@@ -23,8 +23,10 @@ func init() {
 func main() {
 	flag.Parse()
 
+	// we support various reporters
+	// pretty sure we could do something more clever here,
+	// but this seems to work well enough
 	var r canary.Reporter
-	// an opportunity to change the output
 	switch output {
 	case "tsv":
 		r = &canary.TSVReporter{}
