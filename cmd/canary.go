@@ -38,12 +38,13 @@ func main() {
 		fmt.Fprintf(os.Stderr, "-o was set to an invalid option: %s\n", output)
 		os.Exit(1)
 	}
-
 	go r.Start()
 
+	// fire up a sensor
 	s := canary.NewSensor(url, source)
 	go s.Start()
 
+	// move samples from the sensor to the reporter
 	for sample := range s.C {
 		r.Ingest(sample)
 	}
