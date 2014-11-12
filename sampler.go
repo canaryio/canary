@@ -8,6 +8,7 @@ import (
 
 type Sample struct {
 	URL               string
+	Name              string
 	T                 time.Time
 	Source            string
 	IP                string
@@ -29,11 +30,11 @@ func NewSampler() *Sampler {
 	}
 }
 
-func (s *Sampler) Sample(u, source string) *Sample {
+func (s *Sampler) Sample(site *Site, source string) *Sample {
 	defer s.easy.Reset()
 
 	// curl configuration
-	s.easy.Setopt(curl.OPT_URL, u)
+	s.easy.Setopt(curl.OPT_URL, site.URL)
 	noOut := func(buf []byte, userdata interface{}) bool {
 		return true
 	}
@@ -41,7 +42,8 @@ func (s *Sampler) Sample(u, source string) *Sample {
 	s.easy.Setopt(curl.OPT_TIMEOUT, 10)
 
 	sample := &Sample{
-		URL:    u,
+		URL:    site.URL,
+		Name:   site.Name,
 		Source: source,
 		T:      time.Now(),
 		IP:     "n/a",
@@ -62,16 +64,15 @@ func (s *Sampler) Sample(u, source string) *Sample {
 	sample.IP = ip.(string)
 
 	namelookupTime, _ := s.easy.Getinfo(curl.INFO_NAMELOOKUP_TIME)
-	sample.NameLookupTime = namelookupTime.(float64)
-
+	sample.NameLookupTime = namelookupTime.(float64) * 1000
 	connectTime, _ := s.easy.Getinfo(curl.INFO_CONNECT_TIME)
-	sample.ConnectTime = connectTime.(float64)
+	sample.ConnectTime = connectTime.(float64) * 1000
 
 	starttransferTime, _ := s.easy.Getinfo(curl.INFO_STARTTRANSFER_TIME)
-	sample.StartTransferTime = starttransferTime.(float64)
+	sample.StartTransferTime = starttransferTime.(float64) * 1000
 
 	totalTime, _ := s.easy.Getinfo(curl.INFO_TOTAL_TIME)
-	sample.TotalTime = totalTime.(float64)
+	sample.TotalTime = totalTime.(float64) * 1000
 
 	return sample
 }

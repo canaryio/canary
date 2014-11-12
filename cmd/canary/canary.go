@@ -41,7 +41,10 @@ func main() {
 	go r.Start()
 
 	// fire up a sensor
-	s := canary.NewSensor(url, source)
+	site := &canary.Site{
+		URL: url,
+	}
+	s := canary.NewSensor(site, source)
 	go s.Start()
 
 	// move samples from the sensor to the reporter
