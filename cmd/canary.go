@@ -17,7 +17,7 @@ var (
 func init() {
 	flag.StringVar(&url, "u", "http://www.canary.io", "url to monitor")
 	flag.StringVar(&source, "s", "unknown", "source / location of this sensor")
-	flag.StringVar(&output, "o", "logfmt", "output format")
+	flag.StringVar(&output, "o", "tsv", "output format")
 }
 
 func main() {
