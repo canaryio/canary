@@ -15,8 +15,14 @@ var (
 )
 
 func init() {
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to obtain hostname: %s\n", err)
+		os.Exit(1)
+	}
+
 	flag.StringVar(&url, "u", "http://www.canary.io", "url to monitor")
-	flag.StringVar(&source, "s", "unknown", "source / location of this sensor")
+	flag.StringVar(&source, "s", hostname, "source / location of this sensor")
 	flag.StringVar(&output, "o", "tsv", "output format")
 }
 
