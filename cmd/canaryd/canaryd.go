@@ -48,10 +48,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// source
-	source, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
+	source := os.Getenv("SOURCE")
+	if source == "" {
+		source, err = os.Hostname()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// breadboard
