@@ -3,15 +3,15 @@ package canary
 import "time"
 
 type Sensor struct {
-	u    string
+	site *Site
 	l    string
 	C    chan *Sample
 	quit chan int
 }
 
-func NewSensor(u, l string) *Sensor {
+func NewSensor(site *Site, l string) *Sensor {
 	return &Sensor{
-		u:    u,
+		site: site,
 		l:    l,
 		quit: make(chan int),
 		C:    make(chan *Sample),
@@ -25,7 +25,7 @@ func (s *Sensor) Start() {
 	for {
 		select {
 		case <-t.C:
-			s.C <- sampler.Sample(s.u, s.l)
+			s.C <- sampler.Sample(s.site, s.l)
 		case <-s.quit:
 			break
 		}
