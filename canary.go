@@ -36,12 +36,12 @@ type Sampler struct {
 // Sample generates a Sample for a given Site and source.
 func (s *Sampler) Sample(site *Site, source string) *Sample {
 	s.Lock()
-	defer s.easy.Reset()
 	defer s.Unlock()
 
 	if s.easy == nil {
 		s.easy = curl.EasyInit()
 	}
+	defer s.easy.Reset()
 
 	// curl configuration
 	s.easy.Setopt(curl.OPT_URL, site.URL)
