@@ -1,16 +1,19 @@
 package canary
 
 import (
+	"sync"
 	"time"
 
 	"github.com/andelf/go-curl"
 )
 
+// A Site represents that which is being measured
 type Site struct {
 	URL  string
 	Name string
 }
 
+// A Sample contains a point in time measurement made against a given Site.
 type Sample struct {
 	Site              *Site
 	T                 time.Time
@@ -24,18 +27,21 @@ type Sample struct {
 	TotalTime         float64
 }
 
+// A Sampler is capable of generating Samples from a given Site
 type Sampler struct {
+	sync.Mutex
 	easy *curl.CURL
 }
 
-func NewSampler() *Sampler {
-	return &Sampler{
-		easy: curl.EasyInit(),
-	}
-}
-
+// Sample generates a Sample for a given Site and source.
 func (s *Sampler) Sample(site *Site, source string) *Sample {
+	s.Lock()
 	defer s.easy.Reset()
+	defer s.Unlock()
+
+	if s.easy == nil {
+		s.easy = curl.EasyInit()
+	}
 
 	// curl configuration
 	s.easy.Setopt(curl.OPT_URL, site.URL)

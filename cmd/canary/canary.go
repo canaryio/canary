@@ -10,15 +10,18 @@ import (
 	"github.com/canaryio/canary"
 )
 
+// usage prints a useful usage message.
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: %s [url]\n", os.Args[0])
 	flag.PrintDefaults()
 	os.Exit(2)
 }
 
+// schedule repeatedly produces samples of a given canary.Site and reports
+// the samples over a channel.
 func scheduler(site *canary.Site, source string, c chan *canary.Sample) {
 	t := time.NewTicker(time.Second)
-	sampler := canary.NewSampler()
+	sampler := &canary.Sampler{}
 
 	for {
 		select {
@@ -28,7 +31,8 @@ func scheduler(site *canary.Site, source string, c chan *canary.Sample) {
 	}
 }
 
-func emit_tsv(s *canary.Sample, source string) {
+// emitTSV writes a canary.Sample as in TSV format, with space as the delimiter.
+func emitTSV(s *canary.Sample, source string) {
 	fmt.Printf("%s %s %s %s %d %d %f %f %f %f\n",
 		s.T.Format(time.RFC3339),
 		source,
@@ -63,8 +67,7 @@ func main() {
 
 	go scheduler(site, source, c)
 
-	// move samples from the sensor to the reporter
 	for sample := range c {
-		emit_tsv(sample, source)
+		emitTSV(sample, source)
 	}
 }
