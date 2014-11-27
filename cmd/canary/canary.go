@@ -3,58 +3,68 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"time"
 
 	"github.com/canaryio/canary"
 )
 
-var (
-	url    string
-	source string
-	output string
-)
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: %s [url]\n", os.Args[0])
+	flag.PrintDefaults()
+	os.Exit(2)
+}
 
-func init() {
-	hostname, err := os.Hostname()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to obtain hostname: %s\n", err)
-		os.Exit(1)
+func scheduler(site *canary.Site, source string, c chan *canary.Sample) {
+	t := time.NewTicker(time.Second)
+	sampler := canary.NewSampler()
+
+	for {
+		select {
+		case <-t.C:
+			c <- sampler.Sample(site, source)
+		}
 	}
+}
 
-	flag.StringVar(&url, "u", "http://www.canary.io", "url to monitor")
-	flag.StringVar(&source, "s", hostname, "source / location of this sensor")
-	flag.StringVar(&output, "o", "tsv", "output format")
+func emit_tsv(s *canary.Sample, source string) {
+	fmt.Printf("%s %s %s %s %d %d %f %f %f %f\n",
+		s.T.Format(time.RFC3339),
+		source,
+		s.Site.URL,
+		s.IP,
+		s.CurlStatus,
+		s.HTTPStatus,
+		s.NameLookupTime,
+		s.ConnectTime,
+		s.StartTransferTime,
+		s.TotalTime,
+	)
 }
 
 func main() {
+	flag.Usage = usage
 	flag.Parse()
 
-	// we support various reporters
-	// pretty sure we could do something more clever here,
-	// but this seems to work well enough
-	var r canary.Reporter
-	switch output {
-	case "tsv":
-		r = &canary.TSVReporter{}
-	case "logfmt":
-		r = &canary.LogfmtReporter{}
+	args := flag.Args()
+	if len(args) < 1 {
+		usage()
 	}
 
-	if r == nil {
-		fmt.Fprintf(os.Stderr, "-o was set to an invalid option: %s\n", output)
-		os.Exit(1)
-	}
-	go r.Start()
-
-	// fire up a sensor
 	site := &canary.Site{
-		URL: url,
+		URL: args[0],
 	}
-	s := canary.NewSensor(site, source)
-	go s.Start()
+	c := make(chan *canary.Sample)
+	source, err := os.Hostname()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go scheduler(site, source, c)
 
 	// move samples from the sensor to the reporter
-	for sample := range s.C {
-		r.Ingest(sample)
+	for sample := range c {
+		emit_tsv(sample, source)
 	}
 }

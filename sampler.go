@@ -7,8 +7,7 @@ import (
 )
 
 type Sample struct {
-	URL               string
-	Name              string
+	Site              *Site
 	T                 time.Time
 	Source            string
 	IP                string
@@ -42,8 +41,7 @@ func (s *Sampler) Sample(site *Site, source string) *Sample {
 	s.easy.Setopt(curl.OPT_TIMEOUT, 10)
 
 	sample := &Sample{
-		URL:    site.URL,
-		Name:   site.Name,
+		Site:   site,
 		Source: source,
 		T:      time.Now(),
 		IP:     "n/a",
