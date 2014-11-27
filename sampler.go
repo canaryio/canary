@@ -6,6 +6,11 @@ import (
 	"github.com/andelf/go-curl"
 )
 
+type Site struct {
+	URL  string
+	Name string
+}
+
 type Sample struct {
 	Site              *Site
 	T                 time.Time
