@@ -6,7 +6,7 @@ like ping, but for http
 ## Installation
 
 ```sh
-$ go get github.com/canaryio/canary
+$ go get github.com/canaryio/canary/cmd/canary
 ```
 
 ## Usage
