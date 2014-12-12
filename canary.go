@@ -9,7 +9,6 @@ import (
 
 // A Site represents that which is being measured
 type Site struct {
-	ID   string
 	URL  string
 	Name string
 }
