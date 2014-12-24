@@ -3,12 +3,32 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
 	"github.com/canaryio/canary"
 )
+
+type command struct {
+	sampler   canary.Sampler
+	publisher canary.Publisher
+	site      canary.Site
+}
+
+func (cmd command) Run() {
+	c := make(chan measurement)
+	go scheduler(cmd.site, cmd.sampler, c)
+
+	for m := range c {
+		cmd.publisher.Publish(m.Site, m.Sample, m.Error)
+	}
+}
+
+type measurement struct {
+	Site   canary.Site
+	Sample canary.Sample
+	Error  error
+}
 
 // usage prints a useful usage message.
 func usage() {
@@ -19,32 +39,21 @@ func usage() {
 
 // schedule repeatedly produces samples of a given canary.Site and reports
 // the samples over a channel.
-func scheduler(site *canary.Site, source string, c chan *canary.Sample) {
+func scheduler(site canary.Site, sampler canary.Sampler, c chan measurement) {
 	t := time.NewTicker(time.Second)
-	sampler := &canary.Sampler{}
 
 	for {
 		select {
 		case <-t.C:
-			c <- sampler.Sample(site, source)
+			sample, err := sampler.Sample(site)
+			m := measurement{
+				Site:   site,
+				Sample: sample,
+				Error:  err,
+			}
+			c <- m
 		}
 	}
-}
-
-// emitTSV writes a canary.Sample as in TSV format, with space as the delimiter.
-func emitTSV(s *canary.Sample, source string) {
-	fmt.Printf("%s %s %s %s %d %d %f %f %f %f\n",
-		s.T.Format(time.RFC3339),
-		source,
-		s.Site.URL,
-		s.IP,
-		s.CurlStatus,
-		s.HTTPStatus,
-		s.NameLookupTime,
-		s.ConnectTime,
-		s.StartTransferTime,
-		s.TotalTime,
-	)
 }
 
 func main() {
@@ -56,18 +65,12 @@ func main() {
 		usage()
 	}
 
-	site := &canary.Site{
-		URL: args[0],
+	cmd := command{
+		site: canary.Site{
+			URL: args[0],
+		},
+		sampler:   canary.BasicSampler{},
+		publisher: canary.StdoutPublisher{},
 	}
-	c := make(chan *canary.Sample)
-	source, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	go scheduler(site, source, c)
-
-	for sample := range c {
-		emitTSV(sample, source)
-	}
+	cmd.Run()
 }
