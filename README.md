@@ -31,6 +31,6 @@ The following fields are emitted:
 * time
 * url
 * http status code
-* milliseconds
-* healthy?
-* (optional) error message
+* duration of request / response in milliseconds
+* was the response judged as healthy
+* (optional) error message if the response was unhealthy
