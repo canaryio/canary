@@ -2,6 +2,7 @@ canary
 ======
 
 [![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/canaryio/canary)
+[![Build Status](https://img.shields.io/travis/canaryio/canary.svg)](https://travis-ci.org/canaryio/canary)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/canaryio/canary/blob/master/LICENSE)
 
 open monitoring for the open web.
