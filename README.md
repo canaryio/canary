@@ -29,7 +29,6 @@ $ canary http://www.canary.io
 
 The following fields are emitted:
 
-* date
 * time
 * url
 * http status code
