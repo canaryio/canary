@@ -1,6 +1,8 @@
 canary
 ======
 
+[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/canaryio/canary)
+
 like ping, but for http
 
 [`canaryio/canary`](https://github.com/canaryio/canary) is the spiritual successor to [`canaryio/sensord`](https://github.com/canaryio/sensord) and [`canaryio/canaryd`](https://github.com/canaryio/canaryd).
