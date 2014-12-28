@@ -15,11 +15,10 @@ $ go get github.com/canaryio/canary/cmd/canary
 
 ```sh
 $ canary http://www.canary.io
-2014/12/24 21:23:12 http://www.canary.io 200 129 true
-2014/12/24 21:23:13 http://www.canary.io 200 91 true
-2014/12/24 21:23:14 http://www.canary.io 200 89 true
-2014/12/24 21:23:15 http://www.canary.io 200 88 true
-2014/12/24 21:23:16 http://www.canary.io 200 94 true
+2014-12-28T14:44:32Z http://www.canary.io 200 96 true
+2014-12-28T14:44:33Z http://www.canary.io 200 92 true
+2014-12-28T14:44:34Z http://www.canary.io 200 89 true
+2014-12-28T14:44:35Z http://www.canary.io 200 124 true
 ^C
 ```
 
