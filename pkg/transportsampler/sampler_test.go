@@ -1,10 +1,12 @@
-package canary
+package transportsampler
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/canaryio/canary"
 )
 
 func TestSample(t *testing.T) {
@@ -14,11 +16,11 @@ func TestSample(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	target := Target{
+	target := canary.Target{
 		URL: ts.URL,
 	}
 
-	sampler := NewTransportSampler()
+	sampler := New()
 	sample, err := sampler.Sample(target)
 	if err != nil {
 		t.Fatal(err)
