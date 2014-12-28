@@ -8,25 +8,30 @@ import (
 	"time"
 )
 
-type Site struct {
+// Target represents the things that we are measureing.
+type Target struct {
 	URL  string
 	Name string
 }
 
+// Sample represents HTTP state from a given point in time.
 type Sample struct {
 	StatusCode int
 	T1         time.Time
 	T2         time.Time
 }
 
+// A Sampler is an interface that provides the Sample method.
 type Sampler interface {
-	Sample(Site) (Sample, error)
+	Sample(Target) (Sample, error)
 }
 
+// TransportSampler implements Sampler, using http.Transport.
 type TransportSampler struct {
 	tr http.Transport
 }
 
+// NewTransportSampler initializes a sane sampler.
 func NewTransportSampler() TransportSampler {
 	return TransportSampler{
 		tr: http.Transport{
@@ -43,8 +48,9 @@ func NewTransportSampler() TransportSampler {
 	}
 }
 
-func (s TransportSampler) Sample(site Site) (sample Sample, err error) {
-	req, err := http.NewRequest("GET", site.URL, nil)
+// Sample measures a given target and returns both a Sample and error details.
+func (s TransportSampler) Sample(target Target) (sample Sample, err error) {
+	req, err := http.NewRequest("GET", target.URL, nil)
 	if err != nil {
 		return sample, err
 	}

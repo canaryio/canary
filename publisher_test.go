@@ -3,7 +3,7 @@ package canary
 import "time"
 
 func ExampleStdoutPublisher_Publish() {
-	site := Site{
+	target := Target{
 		URL: "http://www.canary.io",
 	}
 
@@ -17,7 +17,7 @@ func ExampleStdoutPublisher_Publish() {
 	}
 
 	p := StdoutPublisher{}
-	p.Publish(site, sample, nil)
+	p.Publish(target, sample, nil)
 	// Output:
 	// 2014-12-28T00:00:01Z http://www.canary.io 200 1000 true
 }
