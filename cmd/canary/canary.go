@@ -12,20 +12,20 @@ import (
 type command struct {
 	sampler   canary.Sampler
 	publisher canary.Publisher
-	site      canary.Site
+	target    canary.Target
 }
 
 func (cmd command) Run() {
 	c := make(chan measurement)
-	go scheduler(cmd.site, cmd.sampler, c)
+	go scheduler(cmd.target, cmd.sampler, c)
 
 	for m := range c {
-		cmd.publisher.Publish(m.Site, m.Sample, m.Error)
+		cmd.publisher.Publish(m.Target, m.Sample, m.Error)
 	}
 }
 
 type measurement struct {
-	Site   canary.Site
+	Target canary.Target
 	Sample canary.Sample
 	Error  error
 }
@@ -37,17 +37,17 @@ func usage() {
 	os.Exit(2)
 }
 
-// schedule repeatedly produces samples of a given canary.Site and reports
+// schedule repeatedly produces samples of a given canary.Target and reports
 // the samples over a channel.
-func scheduler(site canary.Site, sampler canary.Sampler, c chan measurement) {
+func scheduler(target canary.Target, sampler canary.Sampler, c chan measurement) {
 	t := time.NewTicker(time.Second)
 
 	for {
 		select {
 		case <-t.C:
-			sample, err := sampler.Sample(site)
+			sample, err := sampler.Sample(target)
 			m := measurement{
-				Site:   site,
+				Target: target,
 				Sample: sample,
 				Error:  err,
 			}
@@ -66,7 +66,7 @@ func main() {
 	}
 
 	cmd := command{
-		site: canary.Site{
+		target: canary.Target{
 			URL: args[0],
 		},
 		sampler:   canary.NewTransportSampler(),
