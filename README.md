@@ -2,6 +2,7 @@ canary
 ======
 
 [![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/canaryio/canary)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/canaryio/canary/blob/master/LICENSE)
 
 like ping, but for http
 
