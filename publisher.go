@@ -2,7 +2,7 @@ package canary
 
 import (
 	"fmt"
-	"log"
+	"time"
 )
 
 // Publisher is the interface that adds the Publish method.
@@ -32,6 +32,6 @@ func (p StdoutPublisher) Publish(site Site, sample Sample, err error) error {
 		errMessage = fmt.Sprintf("'%s'", err)
 	}
 
-	log.Printf("%s %d %d %t %s", site.URL, sample.StatusCode, duration, isOK, errMessage)
+	fmt.Printf("%s %s %d %d %t %s\n", sample.T2.Format(time.RFC3339), site.URL, sample.StatusCode, duration, isOK, errMessage)
 	return nil
 }
