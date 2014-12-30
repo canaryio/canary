@@ -9,6 +9,39 @@ a mutli-site monitoring tool.
 $ go get github.com/canaryio/canary/cmd/canaryd
 ```
 
+## Configuration
+
+`canaryd` is configured via environment variables:
+
+* `MANIFEST_URL` - ref to a JSON document describing what needs to be monitored
+
+## Manifest
+
+A manifest is a simple JSON document describing the sites to be monitored.  An example:
+
+```js
+{
+  "targets": [
+    {
+      "url": "http://www.canary.io",
+      "name": "canary"
+    },
+    {
+      "url": "https://www.simple.com/",
+      "name": "simple"
+    },
+    {
+      "url": "https://www.heroku.com/",
+      "name": "heroku"
+    },
+    {
+      "url": "https://github.com",
+      "name": "github"
+    }
+  ]
+}
+```
+
 ## Usage
 
 ```sh
