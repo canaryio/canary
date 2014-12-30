@@ -11,5 +11,5 @@ open monitoring for the open web.
 
 ## components
 
-* `canary` - a cli tool that behaves in a similar fashion to ping
-* `canaryd` - a more complex server process designed to monitor more than one website
+* [`canary`](https://github.com/canaryio/canary/tree/master/cmd/canary) - a cli tool that behaves in a similar fashion to ping
+* [`canaryd`](https://github.com/canaryio/canary/tree/master/cmd/canaryd) - a more complex server process designed to monitor more than one website
