@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/canaryio/canary"
+	"github.com/canaryio/canary/pkg/stdoutpublisher"
+	"github.com/canaryio/canary/pkg/transportsampler"
 )
 
 type command struct {
@@ -15,15 +17,15 @@ type command struct {
 }
 
 func (cmd command) Run() {
-	sensor := canary.Sensor{
+	scheduler := canary.Scheduler{
 		Target:  cmd.target,
 		C:       make(chan canary.Measurement),
-		Sampler: canary.NewTransportSampler(),
+		Sampler: cmd.sampler,
 	}
-	go sensor.Start()
+	go scheduler.Start()
 
-	for m := range sensor.C {
-		cmd.publisher.Publish(m.Target, m.Sample, m.Error)
+	for m := range scheduler.C {
+		cmd.publisher.Publish(m)
 	}
 }
 
@@ -47,8 +49,8 @@ func main() {
 		target: canary.Target{
 			URL: args[0],
 		},
-		sampler:   canary.NewTransportSampler(),
-		publisher: canary.StdoutPublisher{},
+		sampler:   transportsampler.New(),
+		publisher: stdoutpublisher.New(),
 	}
 	cmd.Run()
 }

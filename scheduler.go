@@ -9,9 +9,9 @@ type Measurement struct {
 	Error  error
 }
 
-// Sensor is capable of repeatedly measuring a given Target
+// Scheduler is capable of repeatedly measuring a given Target
 // with a specific Sampler, and returns those results over channel C.
-type Sensor struct {
+type Scheduler struct {
 	Target   Target
 	C        chan Measurement
 	Sampler  Sampler
@@ -19,7 +19,7 @@ type Sensor struct {
 }
 
 // take a sample against a target.
-func (s *Sensor) measure() Measurement {
+func (s *Scheduler) measure() Measurement {
 	sample, err := s.Sampler.Sample(s.Target)
 	return Measurement{
 		Target: s.Target,
@@ -29,7 +29,7 @@ func (s *Sensor) measure() Measurement {
 }
 
 // Start is meant to be called within a goroutine, and fires up the main event loop.
-func (s *Sensor) Start() {
+func (s *Scheduler) Start() {
 	if s.stopChan == nil {
 		s.stopChan = make(chan int)
 	}
@@ -46,6 +46,6 @@ func (s *Sensor) Start() {
 }
 
 // Stop halts the event loop.
-func (s *Sensor) Stop() {
+func (s *Scheduler) Stop() {
 	close(s.stopChan)
 }

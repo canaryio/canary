@@ -4,12 +4,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/canaryio/canary"
+	"github.com/canaryio/canary/pkg/libratopublisher"
+	"github.com/canaryio/canary/pkg/stdoutpublisher"
+	"github.com/canaryio/canary/pkg/transportsampler"
 )
 
 type config struct {
-	ManifestURL string
+	ManifestURL   string
+	PublisherList []string
 }
 
 // builds the app configuration via ENV
@@ -18,6 +23,13 @@ func getConfig() (c config, err error) {
 	if c.ManifestURL == "" {
 		err = fmt.Errorf("MANIFEST_URL not defined in ENV")
 	}
+
+	list := os.Getenv("PUBLISHERS")
+	if list == "" {
+		list = "stdout"
+	}
+	c.PublisherList = strings.Split(list, ",")
+
 	return
 }
 
@@ -35,19 +47,40 @@ func main() {
 	// output chan
 	c := make(chan canary.Measurement)
 
-	p := canary.StdoutPublisher{}
+	var publishers []canary.Publisher
 
-	// spinup a sensor for each target
-	for _, target := range manifest.Targets {
-		sensor := canary.Sensor{
-			Target:  target,
-			C:       c,
-			Sampler: canary.NewTransportSampler(),
+	// spinup publishers
+	for _, publisher := range conf.PublisherList {
+		switch publisher {
+		case "stdout":
+			p := stdoutpublisher.New()
+			publishers = append(publishers, p)
+		case "librato":
+			p, err := libratopublisher.NewFromEnv()
+			if err != nil {
+				log.Fatal(err)
+			}
+			go p.Start()
+			publishers = append(publishers, p)
+		default:
+			log.Printf("Unknown publisher: %s", publisher)
 		}
-		go sensor.Start()
 	}
 
+	// spinup a scheduler for each target
+	for _, target := range manifest.Targets {
+		scheduler := canary.Scheduler{
+			Target:  target,
+			C:       c,
+			Sampler: transportsampler.New(),
+		}
+		go scheduler.Start()
+	}
+
+	// publish each incoming measurement
 	for m := range c {
-		p.Publish(m.Target, m.Sample, m.Error)
+		for _, p := range publishers {
+			p.Publish(m)
+		}
 	}
 }
