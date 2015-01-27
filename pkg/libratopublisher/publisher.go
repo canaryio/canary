@@ -17,15 +17,15 @@ type Publisher struct {
 
 // New takes a user, token and source and return a pointer
 // to a Publisher.
-func New(user, token, source string) *Publisher {
-	a := libratoaggregator.New(user, token, source)
-
-	return &Publisher{
-		aggregator: a,
+func New(user, token, source string) (p *Publisher) {
+	p = &Publisher{
+		aggregator: libratoaggregator.New(user, token, source),
 	}
+	return
 }
 
-// NewFromEnv is a convenience func that wraps New, and populates the required arguments via environment variables.
+// NewFromEnv is a convenience func that wraps New,
+// and populates the required arguments via environment variables.
 // If required variables cannot be found, errors are returned.
 func NewFromEnv() (*Publisher, error) {
 	user := os.Getenv("LIBRATO_USER")
@@ -50,12 +50,6 @@ func NewFromEnv() (*Publisher, error) {
 	return New(user, token, source), nil
 }
 
-// Start begins the event loop.  This is a blocking operation and
-// is expected to be run within a go routine.
-func (p *Publisher) Start() {
-	go p.aggregator.Start()
-}
-
 // Publish takes a canary.Measurement and delivers it to the aggregator.
 func (p *Publisher) Publish(m canary.Measurement) (err error) {
 	// convert our measurement into a map of metrics
@@ -64,7 +58,7 @@ func (p *Publisher) Publish(m canary.Measurement) (err error) {
 	return
 }
 
-// mapMeasurments takes a canary.Measurement and returns a map with all of the appriopriate metrics
+// mapMeasurments takes a canary.Measurement and returns a map with all of the appropriate metrics
 func mapMeasurement(m canary.Measurement) map[string]float64 {
 	metrics := make(map[string]float64)
 	// latency
