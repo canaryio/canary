@@ -60,7 +60,6 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			go p.Start()
 			publishers = append(publishers, p)
 		default:
 			log.Printf("Unknown publisher: %s", publisher)

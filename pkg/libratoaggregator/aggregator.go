@@ -40,19 +40,21 @@ type Aggregator struct {
 
 // New takes a user, token and source and returns a
 // pointer to an Aggregator.
-func New(user, token, source string) *Aggregator {
-	return &Aggregator{
+func New(user, token, source string) (a *Aggregator) {
+	a = &Aggregator{
 		User:   user,
 		Token:  token,
 		Source: source,
 		C:      make(chan map[string]float64),
 		gauges: make(map[string]gauge),
 	}
+	go a.start()
+	return
 }
 
 // Start begins the event loop for an Aggregator.  It is blocking,
 // and should be run in a goroutine.
-func (a *Aggregator) Start() {
+func (a *Aggregator) start() {
 	t := time.NewTicker(5 * time.Second)
 	for {
 		select {
