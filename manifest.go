@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/canaryio/canary/pkg/sampler"
 )
 
 // Manifest represents configuration data.
 type Manifest struct {
-	Targets []Target
+	Targets []sampler.Target
 }
 
 // GetManifest retreives a manifest from a given URL.

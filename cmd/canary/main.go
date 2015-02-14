@@ -6,14 +6,14 @@ import (
 	"os"
 
 	"github.com/canaryio/canary"
+	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
-	"github.com/canaryio/canary/pkg/transportsampler"
 )
 
 type command struct {
-	sampler   canary.Sampler
+	sampler   sampler.Sampler
 	publisher canary.Publisher
-	target    canary.Target
+	target    sampler.Target
 }
 
 func (cmd command) Run() {
@@ -46,10 +46,10 @@ func main() {
 	}
 
 	cmd := command{
-		target: canary.Target{
+		target: sampler.Target{
 			URL: args[0],
 		},
-		sampler:   transportsampler.New(),
+		sampler:   sampler.New(),
 		publisher: stdoutpublisher.New(),
 	}
 	cmd.Run()

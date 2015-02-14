@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/canaryio/canary"
+	"github.com/canaryio/canary/pkg/sampler"
 )
 
 func TestGoodMeasurement(t *testing.T) {
@@ -15,10 +16,10 @@ func TestGoodMeasurement(t *testing.T) {
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
 	m := canary.Measurement{
-		Target: canary.Target{
+		Target: sampler.Target{
 			Name: "test",
 		},
-		Sample: canary.Sample{
+		Sample: sampler.Sample{
 			T1:         t1,
 			T2:         t2,
 			StatusCode: 200,
@@ -48,15 +49,15 @@ func TestBadHTTPMeasurement(t *testing.T) {
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
 	m := canary.Measurement{
-		Target: canary.Target{
+		Target: sampler.Target{
 			Name: "test",
 		},
-		Sample: canary.Sample{
+		Sample: sampler.Sample{
 			T1:         t1,
 			T2:         t2,
 			StatusCode: 502,
 		},
-		Error: canary.StatusCodeError{
+		Error: sampler.StatusCodeError{
 			StatusCode: 502,
 		},
 	}
@@ -97,10 +98,10 @@ func TestBadTransportMeasurement(t *testing.T) {
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
 	m := canary.Measurement{
-		Target: canary.Target{
+		Target: sampler.Target{
 			Name: "test",
 		},
-		Sample: canary.Sample{
+		Sample: sampler.Sample{
 			T1: t1,
 			T2: t2,
 		},

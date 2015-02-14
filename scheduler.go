@@ -1,20 +1,24 @@
 package canary
 
-import "time"
+import (
+	"time"
+
+	"github.com/canaryio/canary/pkg/sampler"
+)
 
 // Measurement reprents an aggregate of Target, Sample and error.
 type Measurement struct {
-	Target Target
-	Sample Sample
+	Target sampler.Target
+	Sample sampler.Sample
 	Error  error
 }
 
 // Scheduler is capable of repeatedly measuring a given Target
 // with a specific Sampler, and returns those results over channel C.
 type Scheduler struct {
-	Target   Target
+	Target   sampler.Target
 	C        chan Measurement
-	Sampler  Sampler
+	Sampler  sampler.Sampler
 	stopChan chan int
 }
 

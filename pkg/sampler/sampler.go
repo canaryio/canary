@@ -1,22 +1,52 @@
-package transportsampler
+package sampler
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
-
-	"github.com/canaryio/canary"
 )
 
-// TransportSampler implements Sampler, using http.Transport.
-type TransportSampler struct {
-	tr http.Transport
+type Target struct {
+	URL  string
+	Name string
+}
+
+type Sample struct {
+	StatusCode int
+	T1         time.Time
+	T2         time.Time
+}
+
+// Latency returns the amount of milliseconds between T1
+// and T2 (start and finish).
+func (s Sample) Latency() float64 {
+	return s.T2.Sub(s.T1).Seconds() * 1000
+}
+
+// StatusCodeError is an error representing an HTTP Status code
+// of 400 or greater.
+type StatusCodeError struct {
+	StatusCode int
+}
+
+func (e StatusCodeError) Error() string {
+	return fmt.Sprintf(
+		"recieved HTTP status %d",
+		e.StatusCode,
+	)
+}
+
+// Sampler implements Sampler, using http.Transport.
+type Sampler struct {
+	tr        http.Transport
+	UserAgent string
 }
 
 // New initializes a sane sampler.
-func New() TransportSampler {
-	return TransportSampler{
+func New() Sampler {
+	return Sampler{
 		tr: http.Transport{
 			DisableKeepAlives: true,
 			Dial: func(netw, addr string) (net.Conn, error) {
@@ -28,17 +58,18 @@ func New() TransportSampler {
 				return c, nil
 			},
 		},
+		UserAgent: "canary / v3",
 	}
 }
 
 // Sample measures a given target and returns both a Sample and error details.
-func (s TransportSampler) Sample(target canary.Target) (sample canary.Sample, err error) {
+func (s Sampler) Sample(target Target) (sample Sample, err error) {
 	req, err := http.NewRequest("GET", target.URL, nil)
 	if err != nil {
 		return sample, err
 	}
 
-	req.Header.Add("User-Agent", "canary/"+canary.Version)
+	req.Header.Add("User-Agent", s.UserAgent)
 
 	sample.T1 = time.Now()
 	defer func() { sample.T2 = time.Now() }()
@@ -56,7 +87,7 @@ func (s TransportSampler) Sample(target canary.Target) (sample canary.Sample, er
 	}
 
 	if sample.StatusCode >= 400 {
-		err = &canary.StatusCodeError{
+		err = &StatusCodeError{
 			StatusCode: sample.StatusCode,
 		}
 	}
