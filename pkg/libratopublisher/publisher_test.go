@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/sensor"
 )
 
 func TestGoodMeasurement(t *testing.T) {
@@ -15,7 +15,7 @@ func TestGoodMeasurement(t *testing.T) {
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
-	m := canary.Measurement{
+	m := sensor.Measurement{
 		Target: sampler.Target{
 			Name: "test",
 		},
@@ -48,7 +48,7 @@ func TestBadHTTPMeasurement(t *testing.T) {
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
-	m := canary.Measurement{
+	m := sensor.Measurement{
 		Target: sampler.Target{
 			Name: "test",
 		},
@@ -97,7 +97,7 @@ func TestBadTransportMeasurement(t *testing.T) {
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:07Z")
 
-	m := canary.Measurement{
+	m := sensor.Measurement{
 		Target: sampler.Target{
 			Name: "test",
 		},
