@@ -1,30 +1,35 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
-	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/sensor"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
+// the public version of canary
+const Version string = "v3"
+
+// Publisher is the interface that adds the Publish method.
+//
+// Pubilsh takes a Target, and Sample, and an error, and is
+// expected to deliver that data somewhere.
+type Publisher interface {
+	Publish(sensor.Measurement) error
+}
+
 type config struct {
-	ManifestURL   string
 	PublisherList []string
 }
 
 // builds the app configuration via ENV
 func getConfig() (c config, err error) {
-	c.ManifestURL = os.Getenv("MANIFEST_URL")
-	if c.ManifestURL == "" {
-		err = fmt.Errorf("MANIFEST_URL not defined in ENV")
-	}
-
 	list := os.Getenv("PUBLISHERS")
 	if list == "" {
 		list = "stdout"
@@ -34,13 +39,27 @@ func getConfig() (c config, err error) {
 	return
 }
 
+// usage prints a useful usage message.
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: %s [url]\n", os.Args[0])
+	flag.PrintDefaults()
+	os.Exit(2)
+}
+
 func main() {
-	conf, err := getConfig()
-	if err != nil {
-		log.Fatal(err)
+	flag.Usage = usage
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) < 1 {
+		usage()
 	}
 
-	manifest, err := canary.GetManifest(conf.ManifestURL)
+	target := sampler.Target{
+		URL: args[0],
+	}
+
+	conf, err := getConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +67,7 @@ func main() {
 	// output chan
 	c := make(chan sensor.Measurement)
 
-	var publishers []canary.Publisher
+	var publishers []Publisher
 
 	// spinup publishers
 	for _, publisher := range conf.PublisherList {
@@ -67,15 +86,13 @@ func main() {
 		}
 	}
 
-	// spinup a sensor for each target
-	for _, target := range manifest.Targets {
-		sensor := sensor.Sensor{
-			Target:  target,
-			C:       c,
-			Sampler: sampler.New(),
-		}
-		go sensor.Start()
+	// spinup a sensor for our target
+	sensor := sensor.Sensor{
+		Target:  target,
+		C:       make(chan sensor.Measurement),
+		Sampler: sampler.New(),
 	}
+	go sensor.Start()
 
 	// publish each incoming measurement
 	for m := range c {
