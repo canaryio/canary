@@ -1,4 +1,4 @@
-package canary
+package sensor
 
 import (
 	"time"
@@ -13,9 +13,9 @@ type Measurement struct {
 	Error  error
 }
 
-// Scheduler is capable of repeatedly measuring a given Target
+// Sensor is capable of repeatedly measuring a given Target
 // with a specific Sampler, and returns those results over channel C.
-type Scheduler struct {
+type Sensor struct {
 	Target   sampler.Target
 	C        chan Measurement
 	Sampler  sampler.Sampler
@@ -23,7 +23,7 @@ type Scheduler struct {
 }
 
 // take a sample against a target.
-func (s *Scheduler) measure() Measurement {
+func (s *Sensor) measure() Measurement {
 	sample, err := s.Sampler.Sample(s.Target)
 	return Measurement{
 		Target: s.Target,
@@ -33,7 +33,7 @@ func (s *Scheduler) measure() Measurement {
 }
 
 // Start is meant to be called within a goroutine, and fires up the main event loop.
-func (s *Scheduler) Start() {
+func (s *Sensor) Start() {
 	if s.stopChan == nil {
 		s.stopChan = make(chan int)
 	}
@@ -50,6 +50,6 @@ func (s *Scheduler) Start() {
 }
 
 // Stop halts the event loop.
-func (s *Scheduler) Stop() {
+func (s *Sensor) Stop() {
 	close(s.stopChan)
 }

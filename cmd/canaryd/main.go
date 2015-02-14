@@ -9,6 +9,7 @@ import (
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/sensor"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
@@ -45,7 +46,7 @@ func main() {
 	}
 
 	// output chan
-	c := make(chan canary.Measurement)
+	c := make(chan sensor.Measurement)
 
 	var publishers []canary.Publisher
 
@@ -66,14 +67,14 @@ func main() {
 		}
 	}
 
-	// spinup a scheduler for each target
+	// spinup a sensor for each target
 	for _, target := range manifest.Targets {
-		scheduler := canary.Scheduler{
+		sensor := sensor.Sensor{
 			Target:  target,
 			C:       c,
 			Sampler: sampler.New(),
 		}
-		go scheduler.Start()
+		go sensor.Start()
 	}
 
 	// publish each incoming measurement

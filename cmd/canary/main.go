@@ -7,6 +7,7 @@ import (
 
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/sensor"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
@@ -17,14 +18,14 @@ type command struct {
 }
 
 func (cmd command) Run() {
-	scheduler := canary.Scheduler{
+	sensor := sensor.Sensor{
 		Target:  cmd.target,
-		C:       make(chan canary.Measurement),
+		C:       make(chan sensor.Measurement),
 		Sampler: cmd.sampler,
 	}
-	go scheduler.Start()
+	go sensor.Start()
 
-	for m := range scheduler.C {
+	for m := range sensor.C {
 		cmd.publisher.Publish(m)
 	}
 }

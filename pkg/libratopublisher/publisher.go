@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratoaggregator"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/sensor"
 )
 
 // Publisher implements the canary.Publisher interface and
@@ -52,7 +52,7 @@ func NewFromEnv() (*Publisher, error) {
 }
 
 // Publish takes a canary.Measurement and delivers it to the aggregator.
-func (p *Publisher) Publish(m canary.Measurement) (err error) {
+func (p *Publisher) Publish(m sensor.Measurement) (err error) {
 	// convert our measurement into a map of metrics
 	// send the map on to the librato aggregator
 	p.aggregator.C <- mapMeasurement(m)
@@ -60,7 +60,7 @@ func (p *Publisher) Publish(m canary.Measurement) (err error) {
 }
 
 // mapMeasurments takes a canary.Measurement and returns a map with all of the appropriate metrics
-func mapMeasurement(m canary.Measurement) map[string]float64 {
+func mapMeasurement(m sensor.Measurement) map[string]float64 {
 	metrics := make(map[string]float64)
 	// latency
 	metrics["canary."+m.Target.Name+".latency"] = m.Sample.Latency()

@@ -3,8 +3,8 @@ package stdoutpublisher
 import (
 	"time"
 
-	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/sensor"
 )
 
 func ExamplePublisher_Publish() {
@@ -22,7 +22,7 @@ func ExamplePublisher_Publish() {
 	}
 
 	p := New()
-	p.Publish(canary.Measurement{
+	p.Publish(sensor.Measurement{
 		Target: target,
 		Sample: sample,
 	})
