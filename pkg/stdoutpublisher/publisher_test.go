@@ -4,17 +4,18 @@ import (
 	"time"
 
 	"github.com/canaryio/canary"
+	"github.com/canaryio/canary/pkg/sampler"
 )
 
 func ExamplePublisher_Publish() {
-	target := canary.Target{
+	target := sampler.Target{
 		URL: "http://www.canary.io",
 	}
 
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:01Z")
 
-	sample := canary.Sample{
+	sample := sampler.Sample{
 		T1:         t1,
 		T2:         t2,
 		StatusCode: 200,

@@ -8,8 +8,8 @@ import (
 
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratopublisher"
+	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
-	"github.com/canaryio/canary/pkg/transportsampler"
 )
 
 type config struct {
@@ -71,7 +71,7 @@ func main() {
 		scheduler := canary.Scheduler{
 			Target:  target,
 			C:       c,
-			Sampler: transportsampler.New(),
+			Sampler: sampler.New(),
 		}
 		go scheduler.Start()
 	}

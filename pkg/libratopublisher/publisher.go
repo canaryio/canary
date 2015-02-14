@@ -6,6 +6,7 @@ import (
 
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratoaggregator"
+	"github.com/canaryio/canary/pkg/sampler"
 )
 
 // Publisher implements the canary.Publisher interface and
@@ -69,7 +70,7 @@ func mapMeasurement(m canary.Measurement) map[string]float64 {
 
 		// increment a specific error metric
 		switch m.Error.(type) {
-		case canary.StatusCodeError:
+		case sampler.StatusCodeError:
 			metrics["canary."+m.Target.Name+".errors.http"] = 1
 		default:
 			metrics["canary."+m.Target.Name+".errors.sampler"] = 1
