@@ -34,6 +34,7 @@ func getConfig() (c config, err error) {
 	c.PublisherList = strings.Split(list, ",")
 
 	interval := os.Getenv("DEFAULT_SAMPLE_INTERVAL")
+	// if the variable is unset, an empty string will be returned
 	if interval == "" {
 		interval = "1"
 	}
@@ -82,6 +83,8 @@ func main() {
 	for _, target := range manifest.Targets {
 		// Determine whether to use target.Interval or conf.DefaultSampleInterval
 		var interval int;
+		// Targets that lack an interval value in JSON will have their value set to zero. in this case,
+		// use the DefaultSampleInterval
 		if target.Interval == 0 {
 			interval = conf.DefaultSampleInterval
 		} else {
