@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
@@ -15,6 +16,7 @@ type command struct {
 	sampler   sampler.Sampler
 	publisher canary.Publisher
 	target    sampler.Target
+	interval  int
 }
 
 func (cmd command) Run() {
@@ -23,7 +25,7 @@ func (cmd command) Run() {
 		C:       make(chan sensor.Measurement),
 		Sampler: cmd.sampler,
 	}
-	go sensor.Start()
+	go sensor.Start(cmd.interval)
 
 	for m := range sensor.C {
 		cmd.publisher.Publish(m)
@@ -41,6 +43,15 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	interval_string := os.Getenv("SAMPLE_INTERVAL")
+	if interval_string == "" {
+		interval_string = "1"
+	}
+	sample_interval, err := strconv.Atoi(interval_string)
+	if err != nil {
+		err = fmt.Errorf("SAMPLE_INTERVAL is not a valid integer")
+	}
+
 	args := flag.Args()
 	if len(args) < 1 {
 		usage()
@@ -52,6 +63,7 @@ func main() {
 		},
 		sampler:   sampler.New(),
 		publisher: stdoutpublisher.New(),
+		interval: sample_interval,
 	}
 	cmd.Run()
 }
