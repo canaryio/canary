@@ -15,10 +15,13 @@ $ go get github.com/canaryio/canary/cmd/canaryd
 
 * `MANIFEST_URL` - ref to a JSON document describing what needs to be monitored
 * `PUBLISHERS` - an explicit list of pubilshers to enable, defaulting to `stdout`
+* `DEFAULT_SAMPLE_INTERVAL` - interval rate (in seconds) for targets without a defined interval value, defaults to 1 second.
 
 ## Manifest
 
 A manifest is a simple JSON document describing the sites to be monitored.  You must create such a document and host it somewhere so that it is accessible to `canaryd`.
+
+Within the manifest, targets are defined as a json object with the required keys 'url' and 'name'. 'interval' is optional, and will define the interval rate in seconds to check the specific url, overriding the default interval settings in canaryd
 
 An example manifest:
 
@@ -39,7 +42,8 @@ An example manifest:
     },
     {
       "url": "https://github.com",
-      "name": "github"
+      "name": "github",
+      "interval": 60
     }
   ]
 }

@@ -11,6 +11,7 @@ import (
 type Target struct {
 	URL  string
 	Name string
+	Interval int
 }
 
 type Sample struct {
