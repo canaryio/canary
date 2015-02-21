@@ -16,6 +16,7 @@ $ go get github.com/canaryio/canary/cmd/canaryd
 * `MANIFEST_URL` - ref to a JSON document describing what needs to be monitored
 * `PUBLISHERS` - an explicit list of pubilshers to enable, defaulting to `stdout`
 * `DEFAULT_SAMPLE_INTERVAL` - interval rate (in seconds) for targets without a defined interval value, defaults to 1 second.
+* `RAMPUP_SENSORS` - When set to 'yes', configure a delayed start for each target sensors, with the delay based on an even division of DEFAULT_SAMPLE_INTERVAL by the target index. This assists with performance for large numbers of targets. This will cause all targets to be measured within one full DEFAULT_SAMPLE_INTERVAL when starting.
 
 ## Manifest
 
@@ -47,6 +48,24 @@ An example manifest:
     }
   ]
 }
+```
+
+## Rampup sensors option
+
+This ENV option allows each target to be started on an even division of the DEFAULT_SAMPLE_INTERVAL value. Executing with RAMPUP_SENSORS=yes on
+a 4 second DEFAULT_SAMPLE_INTERVAL:
+
+```sh
+$ MANIFEST_URL=http://www.canary.io/manifest.json DEFAULT_SAMPLE_INTERVAL=4 RAMPUP_SENSORS=yes ./canaryd
+2015-02-21T16:58:47-05:00 http://www.simple.com/ 301 71.189670 true
+2015-02-21T16:58:48-05:00 http://www.canary.io 200 2221.243963 true
+2015-02-21T16:58:49-05:00 http://github.com 301 130.786490 true
+2015-02-21T16:58:50-05:00 http://www.canary.io 200 164.862335 true
+2015-02-21T16:58:50-05:00 http://www.heroku.com 301 2248.900172 true
+2015-02-21T16:58:51-05:00 http://www.simple.com/ 301 43.400060 true
+2015-02-21T16:58:52-05:00 http://www.heroku.com 301 135.366210 true
+2015-02-21T16:58:53-05:00 http://github.com 301 67.303349 true
+^C
 ```
 
 ## Publishers

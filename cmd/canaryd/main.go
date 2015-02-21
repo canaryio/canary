@@ -17,6 +17,7 @@ import (
 type config struct {
 	ManifestURL   string
 	DefaultSampleInterval int
+	RampupSensors bool
 	PublisherList []string
 }
 
@@ -43,6 +44,14 @@ func getConfig() (c config, err error) {
 		err = fmt.Errorf("DEFAULT_SAMPLE_INTERVAL is not a valid integer")
 	}
 
+	// Set RampupSensors if RAMPUP_SENSORS is set to 'yes'
+	rampUp := os.Getenv("RAMPUP_SENSORS")
+	if rampUp == "yes" {
+		c.RampupSensors = true
+	} else {
+		c.RampupSensors = false
+	}
+
 	return
 }
 
@@ -55,6 +64,10 @@ func main() {
 	manifest, err := canary.GetManifest(conf.ManifestURL)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if conf.RampupSensors {
+		manifest.GenerateRampupDelays(conf.DefaultSampleInterval)
 	}
 
 	// output chan
@@ -80,7 +93,7 @@ func main() {
 	}
 
 	// spinup a sensor for each target
-	for _, target := range manifest.Targets {
+	for index, target := range manifest.Targets {
 		// Determine whether to use target.Interval or conf.DefaultSampleInterval
 		var interval int;
 		// Targets that lack an interval value in JSON will have their value set to zero. in this case,
@@ -95,7 +108,7 @@ func main() {
 			C:       c,
 			Sampler: sampler.New(),
 		}
-		go sensor.Start(interval)
+		go sensor.Start(interval, manifest.StartDelays[index])
 	}
 
 	// publish each incoming measurement

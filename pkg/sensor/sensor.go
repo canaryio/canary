@@ -33,10 +33,16 @@ func (s *Sensor) measure() Measurement {
 }
 
 // Start is meant to be called within a goroutine, and fires up the main event loop.
-func (s *Sensor) Start(interval int) {
+// interval is number of seconds. delay is number of ms.
+func (s *Sensor) Start(interval int, delay float64) {
 	if s.stopChan == nil {
 		s.stopChan = make(chan int)
 	}
+
+	// Delay for loop start offset.
+	time.Sleep((time.Millisecond * time.Duration(delay)))
+
+	// Start the ticker for this sensors interval
 	t := time.NewTicker((time.Second * time.Duration(interval)))
 
 	for {
