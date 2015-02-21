@@ -39,6 +39,9 @@ func (s *Sensor) Start(interval int) {
 	}
 	t := time.NewTicker((time.Second * time.Duration(interval)))
 
+	// Measure, then wait for ticker interval
+	s.C <- s.measure()
+
 	for {
 		select {
 		case <-s.stopChan:
