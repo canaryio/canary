@@ -25,7 +25,7 @@ func (cmd command) Run() {
 		C:       make(chan sensor.Measurement),
 		Sampler: cmd.sampler,
 	}
-	go sensor.Start(cmd.interval)
+	go sensor.Start(cmd.interval, 0.0) // Start delay of zero.
 
 	for m := range sensor.C {
 		cmd.publisher.Publish(m)
