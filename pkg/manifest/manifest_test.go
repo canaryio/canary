@@ -1,4 +1,4 @@
-package canary
+package manifest
 
 import (
 	"fmt"

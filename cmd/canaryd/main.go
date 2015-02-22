@@ -10,6 +10,7 @@ import (
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/sampler"
+	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/sensor"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
@@ -61,7 +62,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	manifest, err := canary.GetManifest(conf.ManifestURL)
+	manifest, err := manifest.GetManifest(conf.ManifestURL)
 	if err != nil {
 		log.Fatal(err)
 	}
