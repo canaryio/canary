@@ -122,6 +122,7 @@ func (c *Canary) startSensors() {
 			Sampler:   sampler.New(),
 			StopChan:  make(chan int, 1),
 			IsStopped: make(chan bool),
+			IsOK:      false,
 		}
 		c.Sensors = append(c.Sensors, sensor)
 

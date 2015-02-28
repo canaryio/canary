@@ -23,9 +23,11 @@ func ExamplePublisher_Publish() {
 
 	p := New()
 	p.Publish(sensor.Measurement{
-		Target: target,
-		Sample: sample,
+		Target:     target,
+		Sample:     sample,
+		IsOK:       true,
+		StateCount: 2,
 	})
 	// Output:
-	// 2014-12-28T00:00:01Z http://www.canary.io 200 1000.000000 true
+	// 2014-12-28T00:00:01Z http://www.canary.io 200 1000.000000 true 2
 }
