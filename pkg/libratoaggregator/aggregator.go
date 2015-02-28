@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/canaryio/canary/pkg/canaryversion"
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/canaryio/canary"
 )
 
 type gauge struct {
@@ -118,7 +117,7 @@ func (a *Aggregator) flush() error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "canary/"+canary.Version)
+	req.Header.Add("User-Agent", "canary/"+canaryversion.Version)
 
 	req.SetBasicAuth(a.User, a.Token)
 

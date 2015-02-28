@@ -9,8 +9,8 @@ import (
 )
 
 type Target struct {
-	URL  string
-	Name string
+	URL      string
+	Name     string
 	Interval int
 }
 
