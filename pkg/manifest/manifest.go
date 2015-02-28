@@ -10,19 +10,19 @@ import (
 
 // Manifest represents configuration data.
 type Manifest struct {
-	Targets []sampler.Target
+	Targets     []sampler.Target
 	StartDelays []float64
 }
 
 // GenerateRampupDelays generates an even distribution of sensor start delays
 // based on the passed number of interval seconds and the number of targets.
 func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
-	var intervalMilliseconds = float64(intervalSeconds*1000)
+	var intervalMilliseconds = float64(intervalSeconds * 1000)
 
-	var chunkSize = float64(intervalMilliseconds/float64(len(m.Targets)))
+	var chunkSize = float64(intervalMilliseconds / float64(len(m.Targets)))
 
 	for i := 0.0; i < intervalMilliseconds; i = i + chunkSize {
-		m.StartDelays[int((i/chunkSize))] = i
+		m.StartDelays[int((i / chunkSize))] = i
 	}
 }
 

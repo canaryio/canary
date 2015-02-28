@@ -8,29 +8,8 @@ import (
 
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
-	"github.com/canaryio/canary/pkg/sensor"
-	"github.com/canaryio/canary/pkg/stdoutpublisher"
+	"github.com/canaryio/canary/pkg/manifest"
 )
-
-type command struct {
-	sampler   sampler.Sampler
-	publisher canary.Publisher
-	target    sampler.Target
-	interval  int
-}
-
-func (cmd command) Run() {
-	sensor := sensor.Sensor{
-		Target:  cmd.target,
-		C:       make(chan sensor.Measurement),
-		Sampler: cmd.sampler,
-	}
-	go sensor.Start(cmd.interval, 0.0) // Start delay of zero.
-
-	for m := range sensor.C {
-		cmd.publisher.Publish(m)
-	}
-}
 
 // usage prints a useful usage message.
 func usage() {
@@ -57,13 +36,19 @@ func main() {
 		usage()
 	}
 
-	cmd := command{
-		target: sampler.Target{
-			URL: args[0],
-		},
-		sampler:   sampler.New(),
-		publisher: stdoutpublisher.New(),
-		interval: sample_interval,
-	}
-	cmd.Run()
+	c := canary.New()
+	conf := canary.Config{}
+	manifest := manifest.Manifest{}
+
+	conf.DefaultSampleInterval = sample_interval
+	conf.PublisherList = []string{"stdout"}
+	manifest.StartDelays = []float64{0.0}
+	manifest.Targets = []sampler.Target{ sampler.Target{URL: args[0]} }
+
+	c.Config = conf
+	c.Manifest = manifest
+
+	// Start canary and block in the signal handler
+	c.Run()
+	c.SignalHandler()
 }
