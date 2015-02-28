@@ -1,4 +1,4 @@
-package canary
+package manifest
 
 import (
 	"encoding/json"
@@ -18,7 +18,9 @@ type Manifest struct {
 // based on the passed number of interval seconds and the number of targets.
 func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
 	var intervalMilliseconds = float64(intervalSeconds*1000)
+
 	var chunkSize = float64(intervalMilliseconds/float64(len(m.Targets)))
+
 	for i := 0.0; i < intervalMilliseconds; i = i + chunkSize {
 		m.StartDelays[int((i/chunkSize))] = i
 	}
