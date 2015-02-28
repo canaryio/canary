@@ -88,6 +88,108 @@ func TestGetManifestWithInterval(t *testing.T) {
 	}
 }
 
+func TestGetManifestWithTags(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		data := `{
+			"targets": [
+				{
+					"url": "http://www.canary.io",
+					"name": "canary"
+				},
+				{
+					"url": "http://www.github.com",
+					"name": "github",
+					"tags": [ "tag1", "tag2" ]
+				}
+			]
+		}`
+
+		fmt.Fprintf(w, data)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	m, err := GetManifest(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first_target := m.Targets[0]
+	
+	if (len(first_target.Tags) != 0) {
+		t.Fatalf("expected Tags on the first target to be empty, got %v", first_target.Tags)
+	}
+
+	second_target := m.Targets[1]
+
+	if len(second_target.Tags) != 2 {
+		t.Fatalf("expected number of Tags on the second target to be equal to the manifest json definition of 2, got %d", len(second_target.Tags))
+	} else {
+		if second_target.Tags[0] != "tag1" {
+			t.Fatalf("expected first element of Tags on the second target to be equal to the manifest json definition of 'tag1', got %s", second_target.Tags[0])
+		}
+
+		if second_target.Tags[1] != "tag2" {
+			t.Fatalf("expected first element of Tags on the second target to be equal to the manifest json definition of 'tag2', got %s", second_target.Tags[1])
+		}
+	}
+}
+
+func TestGetManifestWithAttributes(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		data := `{
+			"targets": [
+				{
+					"url": "http://www.canary.io",
+					"name": "canary"
+				},
+				{
+					"url": "http://www.github.com",
+					"name": "github",
+					"attributes": {
+						"foo": "bar",
+						"baz": "bap"
+					}
+				}
+			]
+		}`
+
+		fmt.Fprintf(w, data)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	m, err := GetManifest(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first_target := m.Targets[0]
+	
+	if first_target.Attributes != nil {
+		t.Fatalf("expected Attributes on the first target to be empty, got %v", first_target.Attributes)
+	}
+
+	second_target := m.Targets[1]
+
+	if second_target.Attributes == nil {
+		t.Fatalf("expected Attributes on the second target to be equal to the manifest json definition, got %v", second_target.Attributes)
+	} else {
+		foo := second_target.Attributes["foo"]
+		
+		if foo != "bar" {
+			t.Fatalf("expected 'foo' element of Attributes on the second target to be equal to the manifest json definition of 'bar', got %s", foo)
+		}
+		
+		baz := second_target.Attributes["baz"]
+		if baz != "bap" {
+			t.Fatalf("expected 'baz' element of Attributes on the second target to be equal to the manifest json definition of 'bap', got %s", baz)
+		}
+	}
+}
+
 func TestGetManifestRampup(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
