@@ -8,7 +8,10 @@ import (
 	"strconv"
 
 	"github.com/canaryio/canary"
+
 	"github.com/canaryio/canary/pkg/manifest"
+	"github.com/canaryio/canary/pkg/libratopublisher"
+	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
 // builds the app configuration via ENV
@@ -17,12 +20,6 @@ func getConfig() (c canary.Config, err error) {
 	if c.ManifestURL == "" {
 		err = fmt.Errorf("MANIFEST_URL not defined in ENV")
 	}
-
-	list := os.Getenv("PUBLISHERS")
-	if list == "" {
-		list = "stdout"
-	}
-	c.PublisherList = strings.Split(list, ",")
 
 	interval := os.Getenv("DEFAULT_SAMPLE_INTERVAL")
 	// if the variable is unset, an empty string will be returned
@@ -45,6 +42,31 @@ func getConfig() (c canary.Config, err error) {
 	return
 }
 
+func createPublishers() (publishers []canary.Publisher) {
+	list := os.Getenv("PUBLISHERS")
+	if list == "" {
+		list = "stdout"
+	}
+	publisherList := strings.Split(list, ",")
+
+	for _, publisher := range publisherList {
+		switch publisher {
+		case "stdout":
+			publishers = append(publishers, stdoutpublisher.New())
+		case "librato":
+			p, err := libratopublisher.NewFromEnv()
+			if err != nil {
+				log.Fatal(err)
+			}
+			publishers = append(publishers, p)
+		default:
+			log.Fatalf("Unknown publisher: %s", publisher)
+		}
+	}
+	
+	return
+}
+
 func main() {
 	conf, err := getConfig()
 	if err != nil {
@@ -60,7 +82,7 @@ func main() {
 		manifest.GenerateRampupDelays(conf.DefaultSampleInterval)
 	}
 
-	c := canary.New()
+	c := canary.New(createPublishers())
 	c.Config = conf
 	c.Manifest = manifest
 

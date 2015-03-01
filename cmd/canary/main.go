@@ -9,6 +9,7 @@ import (
 	"github.com/canaryio/canary"
 	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/manifest"
+	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
 // usage prints a useful usage message.
@@ -36,12 +37,11 @@ func main() {
 		usage()
 	}
 
-	c := canary.New()
+	c := canary.New([]canary.Publisher{ stdoutpublisher.New() })
 	conf := canary.Config{}
 	manifest := manifest.Manifest{}
 
 	conf.DefaultSampleInterval = sample_interval
-	conf.PublisherList = []string{"stdout"}
 	manifest.StartDelays = []float64{0.0}
 	manifest.Targets = []sampler.Target{ sampler.Target{URL: args[0]} }
 
