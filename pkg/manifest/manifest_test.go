@@ -24,7 +24,7 @@ func TestGetManifestWithoutInterval(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL)
+	m, err := GetManifest(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,8 +42,8 @@ func TestGetManifestWithoutInterval(t *testing.T) {
 		t.Fatalf("expected URL to be equal to 'http://www.canary.io', got %s", target.URL)
 	}
 
-	if target.Interval != 0 {
-		t.Fatalf("expected Interval to be equal to zero when undefined in the manifest json, got %d", target.Interval)
+	if target.Interval != 42 {
+		t.Fatal("expected Interval to be equal to 42 when undefined in the manifest json, got %d", target.Interval)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestGetManifestWithInterval(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL)
+	m, err := GetManifest(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestGetManifestWithTags(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL)
+	m, err := GetManifest(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func TestGetManifestWithAttributes(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL)
+	m, err := GetManifest(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestGetManifestRampup(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL)
+	m, err := GetManifest(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -29,7 +29,7 @@ func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
 }
 
 // GetManifest retreives a manifest from a given URL.
-func GetManifest(url string) (manifest Manifest, err error) {
+func GetManifest(url string, defaultInterval int) (manifest Manifest, err error) {
 	var stream io.ReadCloser
 	
 	if url[:7] == "file://" {
@@ -54,6 +54,15 @@ func GetManifest(url string) (manifest Manifest, err error) {
 	err = json.Unmarshal(body, &manifest)
 	if err != nil {
 		return
+	}
+
+	// Determine whether to use target.Interval or defaultInterval
+	// Targets that lack an interval value in JSON will have their value set to zero. in this case,
+	// use defaultInterval
+	for ind := range manifest.Targets {
+		if manifest.Targets[ind].Interval == 0 {
+			manifest.Targets[ind].Interval = defaultInterval
+		}
 	}
 
 	// Initialize manifest.StartDelays to zeros

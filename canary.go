@@ -71,7 +71,7 @@ func (c *Canary) reloader() {
 			}
 
 			// get an updated manifest.
-			manifest, err := manifest.GetManifest(c.Config.ManifestURL)
+			manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -90,15 +90,6 @@ func (c *Canary) startSensors() {
 
 	// spinup a sensor for each target
 	for index, target := range c.Manifest.Targets {
-		// Determine whether to use target.Interval or conf.DefaultSampleInterval
-		var interval int
-		// Targets that lack an interval value in JSON will have their value set to zero. in this case,
-		// use the DefaultSampleInterval
-		if target.Interval == 0 {
-			interval = c.Config.DefaultSampleInterval
-		} else {
-			interval = target.Interval
-		}
 		sensor := sensor.Sensor{
 			Target:    target,
 			C:         c.OutputChan,
@@ -109,7 +100,7 @@ func (c *Canary) startSensors() {
 		}
 		c.Sensors = append(c.Sensors, sensor)
 
-		go sensor.Start(interval, c.Manifest.StartDelays[index])
+		go sensor.Start(c.Manifest.StartDelays[index])
 	}
 }
 

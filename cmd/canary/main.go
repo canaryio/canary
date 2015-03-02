@@ -41,9 +41,13 @@ func main() {
 	conf := canary.Config{}
 	manifest := manifest.Manifest{}
 
-	conf.DefaultSampleInterval = sample_interval
 	manifest.StartDelays = []float64{0.0}
-	manifest.Targets = []sampler.Target{ sampler.Target{URL: args[0]} }
+	manifest.Targets = []sampler.Target{
+		sampler.Target{
+			URL: args[0],
+			Interval: sample_interval,
+		},
+	}
 
 	c.Config = conf
 	c.Manifest = manifest

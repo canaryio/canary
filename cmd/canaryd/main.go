@@ -73,7 +73,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	manifest, err := manifest.GetManifest(conf.ManifestURL)
+	manifest, err := manifest.GetManifest(conf.ManifestURL, conf.DefaultSampleInterval)
 	if err != nil {
 		log.Fatal(err)
 	}
