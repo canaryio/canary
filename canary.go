@@ -6,11 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/sensor"
-	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
 type Canary struct {
@@ -23,8 +21,11 @@ type Canary struct {
 }
 
 // New returns a pointer to a new Publsher.
-func New() *Canary {
-	return &Canary{OutputChan: make(chan sensor.Measurement)}
+func New(publishers []Publisher) *Canary {
+	return &Canary{
+		Publishers: publishers,
+		OutputChan: make(chan sensor.Measurement),
+	}
 }
 
 func (c *Canary) publishMeasurements() {
@@ -84,24 +85,6 @@ func (c *Canary) reloader() {
 	}
 }
 
-func (c *Canary) createPublishers() {
-	for _, publisher := range c.Config.PublisherList {
-		switch publisher {
-		case "stdout":
-			p := stdoutpublisher.New()
-			c.Publishers = append(c.Publishers, p)
-		case "librato":
-			p, err := libratopublisher.NewFromEnv()
-			if err != nil {
-				log.Fatal(err)
-			}
-			c.Publishers = append(c.Publishers, p)
-		default:
-			log.Printf("Unknown publisher: %s", publisher)
-		}
-	}
-}
-
 func (c *Canary) startSensors() {
 	c.Sensors = []sensor.Sensor{} // reset the slice
 
@@ -131,8 +114,6 @@ func (c *Canary) startSensors() {
 }
 
 func (c *Canary) Run() {
-	// spinup publishers
-	c.createPublishers()
 	// create and start sensors
 	c.startSensors()
 	// start a go routine for watching config reloads
