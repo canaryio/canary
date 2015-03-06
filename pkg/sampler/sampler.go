@@ -12,6 +12,9 @@ type Target struct {
 	URL      string
 	Name     string
 	Interval int
+	// metadata
+	Tags []string
+	Attributes map[string]string
 }
 
 type Sample struct {
