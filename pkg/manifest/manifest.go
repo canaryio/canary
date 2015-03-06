@@ -2,8 +2,10 @@ package manifest
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/canaryio/canary/pkg/sampler"
 )
@@ -28,13 +30,23 @@ func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
 
 // GetManifest retreives a manifest from a given URL.
 func GetManifest(url string) (manifest Manifest, err error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return
+	var stream io.ReadCloser
+	
+	if url[:7] == "file://" {
+		stream, err = os.Open(url[7:])
+	} else {
+		resp, e := http.Get(url)
+		err = e
+		if err != nil {
+			return
+		}
+		
+		stream = resp.Body
 	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	defer stream.Close()
+
+	body, err := ioutil.ReadAll(stream)
 	if err != nil {
 		return
 	}
