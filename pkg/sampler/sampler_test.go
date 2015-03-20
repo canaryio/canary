@@ -18,7 +18,7 @@ func TestSample(t *testing.T) {
 		URL: ts.URL,
 	}
 
-	sampler := New()
+	sampler := New(10)
 	sample, err := sampler.Sample(target)
 	if err != nil {
 		t.Fatal(err)

@@ -1,10 +1,14 @@
 package sampler
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -13,8 +17,16 @@ type Target struct {
 	Name     string
 	Interval int
 	// metadata
-	Tags []string
+	Tags       []string
 	Attributes map[string]string
+	Hash       string
+}
+
+func (t *Target) SetHash() {
+	jsonTarget, _ := json.Marshal(t)
+	hasher := md5.New()
+	hasher.Write(jsonTarget)
+	t.Hash = hex.EncodeToString(hasher.Sum(nil))
 }
 
 type Sample struct {
@@ -49,16 +61,17 @@ type Sampler struct {
 }
 
 // New initializes a sane sampler.
-func New() Sampler {
+func New(timeoutSeconds int) Sampler {
+	timeoutDuration, _ := time.ParseDuration(strconv.Itoa(timeoutSeconds) + "s")
 	return Sampler{
 		tr: http.Transport{
 			DisableKeepAlives: true,
 			Dial: func(netw, addr string) (net.Conn, error) {
-				c, err := net.DialTimeout(netw, addr, 10*time.Second)
+				c, err := net.DialTimeout(netw, addr, timeoutDuration)
 				if err != nil {
 					return nil, err
 				}
-				c.SetDeadline(time.Now().Add(10 * time.Second))
+				c.SetDeadline(time.Now().Add(timeoutDuration))
 				return c, nil
 			},
 		},

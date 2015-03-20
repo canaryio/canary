@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/canaryio/canary"
-	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/manifest"
+	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
@@ -32,19 +32,30 @@ func main() {
 		err = fmt.Errorf("SAMPLE_INTERVAL is not a valid integer")
 	}
 
+	timeout := 0
+	defaultTimeout := os.Getenv("DEFAULT_MAX_TIMEOUT")
+	if defaultTimeout == "" {
+		timeout = 10
+	} else {
+		timeout, err = strconv.Atoi(defaultTimeout)
+		if err != nil {
+			err = fmt.Errorf("DEFAULT_MAX_TIMOEUT is not a valid integer")
+		}
+	}
+
 	args := flag.Args()
 	if len(args) < 1 {
 		usage()
 	}
 
-	c := canary.New([]canary.Publisher{ stdoutpublisher.New() })
-	conf := canary.Config{}
+	c := canary.New([]canary.Publisher{stdoutpublisher.New()})
+	conf := canary.Config{MaxSampleTimeout: timeout}
 	manifest := manifest.Manifest{}
 
 	manifest.StartDelays = []float64{0.0}
 	manifest.Targets = []sampler.Target{
 		sampler.Target{
-			URL: args[0],
+			URL:      args[0],
 			Interval: sample_interval,
 		},
 	}

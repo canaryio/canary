@@ -2,7 +2,8 @@ package sensor
 
 import (
 	"time"
-
+	// "fmt"
+	// "errors"
 	"github.com/canaryio/canary/pkg/sampler"
 )
 
@@ -18,13 +19,14 @@ type Measurement struct {
 // Sensor is capable of repeatedly measuring a given Target
 // with a specific Sampler, and returns those results over channel C.
 type Sensor struct {
-	Target       sampler.Target
-	C            chan Measurement
-	Sampler      sampler.Sampler
-	StateCounter int
-	StopChan     chan int
-	IsStopped    chan bool
-	IsOK         bool
+	Target         sampler.Target
+	C              chan Measurement
+	Sampler        sampler.Sampler
+	StateCounter   int
+	StopChan       chan int
+	IsStopped      bool
+	StopNotifyChan chan bool
+	IsOK           bool
 }
 
 // take a sample against a target.
@@ -66,7 +68,8 @@ func (s *Sensor) Start(delay float64) {
 		<-t.C
 		select {
 		case <-s.StopChan:
-			s.IsStopped <- true
+			s.IsStopped = true
+			s.StopNotifyChan <- true
 			return
 		default:
 			s.C <- s.measure()

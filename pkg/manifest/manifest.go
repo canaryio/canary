@@ -1,19 +1,23 @@
 package manifest
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	// "fmt"
 
 	"github.com/canaryio/canary/pkg/sampler"
 )
 
 // Manifest represents configuration data.
 type Manifest struct {
-	Targets     []sampler.Target
-	StartDelays []float64
+	Targets       []sampler.Target
+	StartDelays   []float64
+	Hash          string
 }
 
 // GenerateRampupDelays generates an even distribution of sensor start delays
@@ -28,10 +32,21 @@ func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
 	}
 }
 
+func (m *Manifest) Reload() {
+
+}
+
+func (m *Manifest) setHash() {
+	jsonTarget, _ := json.Marshal(m)
+	hasher := md5.New()
+	hasher.Write(jsonTarget)
+	m.Hash = hex.EncodeToString(hasher.Sum(nil))
+}
+
 // GetManifest retreives a manifest from a given URL.
 func GetManifest(url string, defaultInterval int) (manifest Manifest, err error) {
 	var stream io.ReadCloser
-	
+
 	if url[:7] == "file://" {
 		stream, err = os.Open(url[7:])
 	} else {
@@ -40,7 +55,7 @@ func GetManifest(url string, defaultInterval int) (manifest Manifest, err error)
 		if err != nil {
 			return
 		}
-		
+
 		stream = resp.Body
 	}
 
@@ -56,6 +71,9 @@ func GetManifest(url string, defaultInterval int) (manifest Manifest, err error)
 		return
 	}
 
+	// Store the MD5 hash of the raw manifest
+	manifest.setHash()
+
 	// Determine whether to use target.Interval or defaultInterval
 	// Targets that lack an interval value in JSON will have their value set to zero. in this case,
 	// use defaultInterval
@@ -63,6 +81,7 @@ func GetManifest(url string, defaultInterval int) (manifest Manifest, err error)
 		if manifest.Targets[ind].Interval == 0 {
 			manifest.Targets[ind].Interval = defaultInterval
 		}
+		manifest.Targets[ind].SetHash()
 	}
 
 	// Initialize manifest.StartDelays to zeros
