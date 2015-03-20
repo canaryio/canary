@@ -26,9 +26,12 @@ func getConfig() (c canary.Config, err error) {
 	if interval == "" {
 		interval = "1"
 	}
-	c.DefaultSampleInterval, err = strconv.Atoi(interval)
-	if err != nil {
-		err = fmt.Errorf("DEFAULT_SAMPLE_INTERVAL is not a valid integer")
+
+	if err == nil {
+		c.DefaultSampleInterval, err = strconv.Atoi(interval)
+		if err != nil {
+			err = fmt.Errorf("DEFAULT_SAMPLE_INTERVAL is not a valid integer")
+		}
 	}
 
 	// Set RampupSensors if RAMPUP_SENSORS is set to 'yes'
