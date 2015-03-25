@@ -20,6 +20,7 @@ type Target struct {
 	Tags       []string
 	Attributes map[string]string
 	Hash       string
+	CaptureHeaders []string
 }
 
 func (t *Target) SetHash() {
@@ -30,9 +31,10 @@ func (t *Target) SetHash() {
 }
 
 type Sample struct {
-	StatusCode int
-	T1         time.Time
-	T2         time.Time
+	StatusCode      int
+	T1              time.Time
+	T2              time.Time
+	ResponseHeaders map[string]string
 }
 
 // Latency returns the amount of milliseconds between T1
@@ -101,6 +103,11 @@ func (s Sampler) Sample(target Target) (sample Sample, err error) {
 	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
+	}
+	
+	sample.ResponseHeaders = make(map[string]string, len(target.CaptureHeaders))
+	for _, header := range target.CaptureHeaders {
+		sample.ResponseHeaders[header] = resp.Header.Get(header)
 	}
 
 	if sample.StatusCode >= 400 {
