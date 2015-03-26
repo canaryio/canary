@@ -107,7 +107,11 @@ func (s Sampler) Sample(target Target) (sample Sample, err error) {
 	
 	sample.ResponseHeaders = make(map[string]string, len(target.CaptureHeaders))
 	for _, header := range target.CaptureHeaders {
-		sample.ResponseHeaders[header] = resp.Header.Get(header)
+		val := resp.Header.Get(header)
+		
+		if val != "" {
+			sample.ResponseHeaders[header] = val
+		}
 	}
 
 	if sample.StatusCode >= 400 {
