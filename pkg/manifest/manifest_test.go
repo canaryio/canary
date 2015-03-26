@@ -256,3 +256,48 @@ func TestGetManifestRampup(t *testing.T) {
 		t.Fatalf("The second start delay should be 7500.0 ms after generation, got %d", m.StartDelays[3])
 	}
 }
+
+func TestGetManifestWithCapturedHeaders(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		data := `{
+			"targets": [
+				{
+					"url": "http://www.canary.io",
+					"name": "canary"
+				},
+				{
+					"url": "http://www.github.com",
+					"name": "github",
+					"captureHeaders": [ "Server" ]
+				}
+			]
+		}`
+
+		fmt.Fprintf(w, data)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	m, err := GetManifest(ts.URL, 42)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first_target := m.Targets[0]
+	
+	if len(first_target.CaptureHeaders) != 0 {
+		t.Fatalf("expected CaptureHeaders on the first target to be empty, got %v", first_target.CaptureHeaders)
+	}
+
+	second_target := m.Targets[1]
+
+	if len(second_target.CaptureHeaders) != 1 {
+		t.Fatalf("expected Attributes on the second target to be equal to the manifest json definition, got %v", second_target.CaptureHeaders)
+	} else {
+		h := second_target.CaptureHeaders[0]
+		if h != "Server" {
+			t.Fatalf("expected first element of CaptureHeaders on the second target to be equal to the manifest json definition of 'Server', got %s", h)
+		}
+	}
+}
