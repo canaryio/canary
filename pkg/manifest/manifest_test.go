@@ -190,6 +190,54 @@ func TestGetManifestWithAttributes(t *testing.T) {
 	}
 }
 
+func TestGetManifestWithRequestHeaders(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		data := `{
+			"targets": [
+				{
+					"url": "http://www.canary.io",
+					"name": "canary"
+				},
+				{
+					"url": "http://www.github.com",
+					"name": "github",
+					"requestHeaders": {
+						"X-Foo": "bar"
+					}
+				}
+			]
+		}`
+
+		fmt.Fprintf(w, data)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	m, err := GetManifest(ts.URL, 42)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first_target := m.Targets[0]
+	
+	if first_target.RequestHeaders != nil {
+		t.Fatalf("expected RequestHeaders on the first target to be empty, got %v", first_target.RequestHeaders)
+	}
+
+	second_target := m.Targets[1]
+
+	if second_target.RequestHeaders == nil {
+		t.Fatalf("expected RequestHeaders on the second target to be equal to the manifest json definition, got %v", second_target.RequestHeaders)
+	} else {
+		foo := second_target.RequestHeaders["X-Foo"]
+		
+		if foo != "bar" {
+			t.Fatalf("expected 'X-Foo' element of RequestHeaders on the second target to be equal to the manifest json definition of 'bar', got %s", foo)
+		}
+	}
+}
+
 func TestGetManifestRampup(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{

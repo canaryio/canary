@@ -20,6 +20,7 @@ type Target struct {
 	Tags       []string
 	Attributes map[string]string
 	Hash       string
+	RequestHeaders map[string]string
 }
 
 func (t *Target) SetHash() {
@@ -87,6 +88,10 @@ func (s Sampler) Sample(target Target) (sample Sample, err error) {
 	}
 
 	req.Header.Add("User-Agent", s.UserAgent)
+	
+	for key, val := range target.RequestHeaders {
+		req.Header.Add(key, val)
+	}
 
 	sample.T1 = time.Now()
 	defer func() { sample.T2 = time.Now() }()
