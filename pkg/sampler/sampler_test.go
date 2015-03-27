@@ -61,6 +61,38 @@ func TestSampleWithHeaders(t *testing.T) {
 	}
 }
 
+func TestSampleWithCanonicalizedHeaderName(t *testing.T) {
+	headerName := "x-request-id"
+	headerVal  := "abcd-1234"
+	
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Request-Id", headerVal)
+		
+		fmt.Fprintf(w, "ok")
+	}
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	target := Target{
+		URL: ts.URL,
+		CaptureHeaders: []string{ headerName },
+	}
+
+	sampler := New()
+	sample, err := sampler.Sample(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sample.StatusCode != 200 {
+		t.Fatalf("Expected sampleStatus == 200, but got %d\n", sample.StatusCode)
+	}
+	
+	if sample.ResponseHeaders[headerName] != headerVal {
+		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders[headerName])
+	}
+}
+
 func TestSampleWithMissingHeader(t *testing.T) {
 	headerName := "X-Request-Id"
 	
