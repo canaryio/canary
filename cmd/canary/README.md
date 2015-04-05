@@ -13,9 +13,13 @@ $ go get github.com/canaryio/canary/cmd/canary
 
 ## Usage
 
-The first and only argument to canary is the url to check. The environment variable
-SAMPLE_INTERVAL defines the interval (in seconds) to check the url. When the variable is
-unset, the default of 1 second is used. 
+The first and only argument to canary is the url to check. `canary` suppots the following two
+environment variables:
+
+* `SAMPLE_INTERVAL` - defines the interval (in seconds) to check the url. When the variable is
+unset, the default of 1 second is used.
+* `MAX_TIMEOUT` - The timeout value for requests to the url, with the default value of 10
+seconds if not specified.
 
 To run canary with the default sampling interval:
 

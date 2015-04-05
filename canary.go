@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/sampler"
@@ -17,7 +18,7 @@ type Canary struct {
 	Publishers []Publisher
 	Sensors    []sensor.Sensor
 	OutputChan chan sensor.Measurement
-	ReloadChan chan bool
+	ReloadChan chan manifest.Manifest
 }
 
 // New returns a pointer to a new Publsher.
@@ -49,58 +50,100 @@ func (c *Canary) SignalHandler() {
 			}
 			os.Exit(0)
 		case syscall.SIGHUP:
+			manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
+			if err != nil {
+				log.Fatal(err)
+			}
 			// Split reload logic into reloader() as to allow other things to trigger a manifest reload
-			c.ReloadChan <- true
+			c.ReloadChan <- manifest
 		}
 	}
 }
 
 func (c *Canary) reloader() {
 	if c.ReloadChan == nil {
-		c.ReloadChan = make(chan bool)
+		c.ReloadChan = make(chan manifest.Manifest)
 	}
 
-	for r := range c.ReloadChan {
-		if r {
-			// stop all running sensors
-			for _, sensor := range c.Sensors {
-				sensor.Stop()
+	for m := range c.ReloadChan {
+		stoppingSensors := []sensor.Sensor{}
+		for _, sensor := range c.Sensors {
+			found := false
+			for _, newTarget := range m.Targets {
+				if newTarget.Hash == sensor.Target.Hash {
+					found = true
+				}
 			}
-			for _, sensor := range c.Sensors {
-				<-sensor.IsStopped
+			if !found {
+				sensor.Stop()
+				stoppingSensors = append(stoppingSensors, sensor)
 			}
 
-			// get an updated manifest.
-			manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
-			if err != nil {
-				log.Fatal(err)
-			}
-			c.Manifest = manifest
-			if c.Config.RampupSensors {
-				c.Manifest.GenerateRampupDelays(c.Config.DefaultSampleInterval)
-			}
-			// Start new sensors:
-			c.startSensors()
 		}
+		for _, sensor := range stoppingSensors {
+			<-sensor.StopNotifyChan
+		}
+
+		c.Manifest = m
+		if c.Config.RampupSensors {
+			c.Manifest.GenerateRampupDelays(c.Config.DefaultSampleInterval)
+		}
+		// Start new sensors:
+		c.startSensors()
 	}
 }
 
 func (c *Canary) startSensors() {
+	oldSensors := c.Sensors
 	c.Sensors = []sensor.Sensor{} // reset the slice
 
 	// spinup a sensor for each target
 	for index, target := range c.Manifest.Targets {
-		sensor := sensor.Sensor{
-			Target:    target,
-			C:         c.OutputChan,
-			Sampler:   sampler.New(),
-			StopChan:  make(chan int, 1),
-			IsStopped: make(chan bool),
-			IsOK:      false,
+		found := false
+		for _, oldSensor := range oldSensors {
+			if oldSensor.Target.Hash == target.Hash {
+				found = true
+			}
 		}
-		c.Sensors = append(c.Sensors, sensor)
+		if found {
+			for _, oldSensor := range oldSensors {
+				if oldSensor.Target.Hash == target.Hash {
+					c.Sensors = append(c.Sensors, oldSensor)
+				}
+			}
+		} else {
+			timeout := target.Interval
+			if timeout > c.Config.MaxSampleTimeout {
+				timeout = c.Config.MaxSampleTimeout
+			}
 
-		go sensor.Start(c.Manifest.StartDelays[index])
+			sensor := sensor.Sensor{
+				Target:         target,
+				C:              c.OutputChan,
+				Sampler:        sampler.New(timeout),
+				StopChan:       make(chan int, 1),
+				IsStopped:      false,
+				StopNotifyChan: make(chan bool),
+				IsOK:           false,
+			}
+			c.Sensors = append(c.Sensors, sensor)
+
+			go sensor.Start(c.Manifest.StartDelays[index])
+		}
+	}
+}
+
+func (c *Canary) StartAutoReload(interval time.Duration) {
+	t := time.NewTicker(interval)
+	for {
+		<-t.C
+		manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if manifest.Hash != c.Manifest.Hash {
+			c.ReloadChan <- manifest
+		}
 	}
 }
 

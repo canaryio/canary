@@ -116,8 +116,8 @@ func TestGetManifestWithTags(t *testing.T) {
 	}
 
 	first_target := m.Targets[0]
-	
-	if (len(first_target.Tags) != 0) {
+
+	if len(first_target.Tags) != 0 {
 		t.Fatalf("expected Tags on the first target to be empty, got %v", first_target.Tags)
 	}
 
@@ -167,7 +167,7 @@ func TestGetManifestWithAttributes(t *testing.T) {
 	}
 
 	first_target := m.Targets[0]
-	
+
 	if first_target.Attributes != nil {
 		t.Fatalf("expected Attributes on the first target to be empty, got %v", first_target.Attributes)
 	}
@@ -178,11 +178,11 @@ func TestGetManifestWithAttributes(t *testing.T) {
 		t.Fatalf("expected Attributes on the second target to be equal to the manifest json definition, got %v", second_target.Attributes)
 	} else {
 		foo := second_target.Attributes["foo"]
-		
+
 		if foo != "bar" {
 			t.Fatalf("expected 'foo' element of Attributes on the second target to be equal to the manifest json definition of 'bar', got %s", foo)
 		}
-		
+
 		baz := second_target.Attributes["baz"]
 		if baz != "bap" {
 			t.Fatalf("expected 'baz' element of Attributes on the second target to be equal to the manifest json definition of 'bap', got %s", baz)

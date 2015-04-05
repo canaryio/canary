@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/canaryio/canary"
+	"time"
 
-	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/libratopublisher"
+	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
 )
 
@@ -26,9 +27,36 @@ func getConfig() (c canary.Config, err error) {
 	if interval == "" {
 		interval = "1"
 	}
-	c.DefaultSampleInterval, err = strconv.Atoi(interval)
-	if err != nil {
-		err = fmt.Errorf("DEFAULT_SAMPLE_INTERVAL is not a valid integer")
+
+	defaultTimeout := os.Getenv("DEFAULT_MAX_TIMEOUT")
+	// if the variable is unset, an empty string will be returned
+	if defaultTimeout == "" {
+		c.MaxSampleTimeout = 10
+	} else {
+		c.MaxSampleTimeout, err = strconv.Atoi(defaultTimeout)
+		if err != nil {
+			err = fmt.Errorf("DEFAULT_MAX_TIMOEUT is not a valid integer")
+		}
+	}
+
+	if err == nil {
+		c.DefaultSampleInterval, err = strconv.Atoi(interval)
+		if err != nil {
+			err = fmt.Errorf("DEFAULT_SAMPLE_INTERVAL is not a valid integer")
+		}
+	}
+
+	if err == nil {
+		autoReloadInterval := os.Getenv("AUTO_RELOAD_INTERVAL")
+		if autoReloadInterval == "" {
+			autoReloadInterval = "0"
+		}
+
+		duration, err := time.ParseDuration(autoReloadInterval + "s")
+		if err != nil {
+			err = fmt.Errorf("AUTO_RELOAD_INTERVAL is not a valid value for seconds")
+		}
+		c.ReloadInterval = duration
 	}
 
 	// Set RampupSensors if RAMPUP_SENSORS is set to 'yes'
@@ -63,7 +91,7 @@ func createPublishers() (publishers []canary.Publisher) {
 			log.Fatalf("Unknown publisher: %s", publisher)
 		}
 	}
-	
+
 	return
 }
 
@@ -88,5 +116,10 @@ func main() {
 
 	// Start canary and block in the signal handler
 	c.Run()
+
+	u, _ := time.ParseDuration("0s")
+	if c.Config.ReloadInterval != u {
+		go c.StartAutoReload(c.Config.ReloadInterval)
+	}
 	c.SignalHandler()
 }

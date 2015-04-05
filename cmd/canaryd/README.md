@@ -15,6 +15,8 @@ $ go get github.com/canaryio/canary/cmd/canaryd
 
 * `MANIFEST_URL` - ref to a JSON document describing what needs to be monitored
 * `PUBLISHERS` - an explicit list of pubilshers to enable, defaulting to `stdout`
+* `DEFAULT_MAX_TIMEOUT` - The max timeout value for any target. Actual timeout will be this value, or the interval if lower.
+* `AUTO_RELOAD_INTERVAL` - The value (in seconds, as a floating point string) to query MANIFEST_URL for a potential manifest reload.See the Manifest reloading section for more information.
 * `DEFAULT_SAMPLE_INTERVAL` - interval rate (in seconds) for targets without a defined interval value, defaults to 1 second.
 * `RAMPUP_SENSORS` - When set to 'yes', configure a delayed start for each target sensors, with the delay based on an even division of DEFAULT_SAMPLE_INTERVAL by the target index. This assists with performance for large numbers of targets. This will cause all targets to be measured within one full DEFAULT_SAMPLE_INTERVAL when starting.
 
@@ -67,6 +69,20 @@ $ MANIFEST_URL=http://www.canary.io/manifest.json DEFAULT_SAMPLE_INTERVAL=4 RAMP
 2015-02-21T16:58:53-05:00 http://github.com 301 67.303349 true
 ^C
 ```
+
+## Manifest reloading
+
+`canaryd` supports manifest reloading via two means:
+
+- SIGHUP - Canaryd queries the defined MANIFEST_URL and reloads for changes in the defined targets.
+- Automatic reloading - `canaryd` will poll the MANIFEST_URL for changes via the interval defined in the AUTO_RELOAD_INTERVAL environment variable. This variable is a floating point value for the number of seconds that canaryd should poll for manifest changes, with 1, 15.0 and 0.25 all being valid. 
+
+Manifest reloading in canary is done via the following process.
+- If the MD5 hash of the manifest has not changed, do not trigger a reload operation.
+- Within a reload operation:
+    - Any target that is currently running that is not defined in the new manifest is stopped. Changes are detected via md5sum changes on all attributes of the target.
+    - After stopping changed/removed target sensors, any target defined in the new manifest that does not have a running sensor is started.
+    - Targets running with identical definitions in the old and new manifests are not changed, allowing sensor state to persist.
 
 ## Publishers
 
