@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetManifestWithoutInterval(t *testing.T) {
+func TestGetWithoutInterval(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -24,7 +24,7 @@ func TestGetManifestWithoutInterval(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestGetManifestWithoutInterval(t *testing.T) {
 	}
 }
 
-func TestGetManifestWithInterval(t *testing.T) {
+func TestGetWithInterval(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -70,7 +70,7 @@ func TestGetManifestWithInterval(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestGetManifestWithInterval(t *testing.T) {
 	}
 }
 
-func TestGetManifestWithTags(t *testing.T) {
+func TestGetWithTags(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -110,7 +110,7 @@ func TestGetManifestWithTags(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestGetManifestWithTags(t *testing.T) {
 	}
 }
 
-func TestGetManifestWithAttributes(t *testing.T) {
+func TestGetWithAttributes(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -161,7 +161,7 @@ func TestGetManifestWithAttributes(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +190,7 @@ func TestGetManifestWithAttributes(t *testing.T) {
 	}
 }
 
-func TestGetManifestWithRequestHeaders(t *testing.T) {
+func TestGetWithRequestHeaders(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -214,7 +214,7 @@ func TestGetManifestWithRequestHeaders(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +238,7 @@ func TestGetManifestWithRequestHeaders(t *testing.T) {
 	}
 }
 
-func TestGetManifestRampup(t *testing.T) {
+func TestGetRampup(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -267,7 +267,7 @@ func TestGetManifestRampup(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -305,7 +305,7 @@ func TestGetManifestRampup(t *testing.T) {
 	}
 }
 
-func TestGetManifestWithCapturedHeaders(t *testing.T) {
+func TestGetWithCapturedHeaders(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		data := `{
 			"targets": [
@@ -327,7 +327,7 @@ func TestGetManifestWithCapturedHeaders(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(handler))
 	defer ts.Close()
 
-	m, err := GetManifest(ts.URL, 42)
+	m, err := Get(ts.URL, 42)
 	if err != nil {
 		t.Fatal(err)
 	}

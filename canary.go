@@ -50,7 +50,7 @@ func (c *Canary) SignalHandler() {
 			}
 			os.Exit(0)
 		case syscall.SIGHUP:
-			manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
+			manifest, err := manifest.Get(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -137,7 +137,7 @@ func (c *Canary) StartAutoReload(interval time.Duration) {
 	t := time.NewTicker(interval)
 	for {
 		<-t.C
-		manifest, err := manifest.GetManifest(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
+		manifest, err := manifest.Get(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
 		if err != nil {
 			log.Fatal(err)
 		}

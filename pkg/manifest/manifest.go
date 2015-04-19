@@ -42,8 +42,8 @@ func (m *Manifest) setHash() {
 	m.Hash = hex.EncodeToString(hasher.Sum(nil))
 }
 
-// GetManifest retreives a manifest from a given URL.
-func GetManifest(url string, defaultInterval int) (manifest Manifest, err error) {
+// Get retreives a manifest from a given URL.
+func Get(url string, defaultInterval int) (manifest Manifest, err error) {
 	var stream io.ReadCloser
 
 	if url[:7] == "file://" {
