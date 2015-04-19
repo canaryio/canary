@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/canaryio/canary"
 	"time"
+
+	"github.com/canaryio/canary"
 
 	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/manifest"
@@ -101,7 +102,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	manifest, err := manifest.GetManifest(conf.ManifestURL, conf.DefaultSampleInterval)
+	manifest, err := manifest.Get(conf.ManifestURL, conf.DefaultSampleInterval)
 	if err != nil {
 		log.Fatal(err)
 	}
