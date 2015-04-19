@@ -31,10 +31,6 @@ func (m *Manifest) GenerateRampupDelays(intervalSeconds int) {
 	}
 }
 
-func (m *Manifest) Reload() {
-
-}
-
 func (m *Manifest) setHash() {
 	jsonTarget, _ := json.Marshal(m)
 	hasher := md5.New()
