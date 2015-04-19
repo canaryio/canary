@@ -8,16 +8,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	// "fmt"
 
 	"github.com/canaryio/canary/pkg/sampler"
 )
 
 // Manifest represents configuration data.
 type Manifest struct {
-	Targets       []sampler.Target
-	StartDelays   []float64
-	Hash          string
+	Targets     []sampler.Target
+	StartDelays []float64
+	Hash        string
 }
 
 // GenerateRampupDelays generates an even distribution of sensor start delays

@@ -2,8 +2,7 @@ package sensor
 
 import (
 	"time"
-	// "fmt"
-	// "errors"
+
 	"github.com/canaryio/canary/pkg/sampler"
 )
 

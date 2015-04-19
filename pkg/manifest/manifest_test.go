@@ -220,7 +220,7 @@ func TestGetManifestWithRequestHeaders(t *testing.T) {
 	}
 
 	first_target := m.Targets[0]
-	
+
 	if first_target.RequestHeaders != nil {
 		t.Fatalf("expected RequestHeaders on the first target to be empty, got %v", first_target.RequestHeaders)
 	}
@@ -231,7 +231,7 @@ func TestGetManifestWithRequestHeaders(t *testing.T) {
 		t.Fatalf("expected RequestHeaders on the second target to be equal to the manifest json definition, got %v", second_target.RequestHeaders)
 	} else {
 		foo := second_target.RequestHeaders["X-Foo"]
-		
+
 		if foo != "bar" {
 			t.Fatalf("expected 'X-Foo' element of RequestHeaders on the second target to be equal to the manifest json definition of 'bar', got %s", foo)
 		}
@@ -333,7 +333,7 @@ func TestGetManifestWithCapturedHeaders(t *testing.T) {
 	}
 
 	first_target := m.Targets[0]
-	
+
 	if len(first_target.CaptureHeaders) != 0 {
 		t.Fatalf("expected CaptureHeaders on the first target to be empty, got %v", first_target.CaptureHeaders)
 	}
