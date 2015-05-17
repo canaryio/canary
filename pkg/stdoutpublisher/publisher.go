@@ -25,10 +25,10 @@ func (p *Publisher) Publish(m sensor.Measurement) (err error) {
 
 	fmt.Printf(
 		"%s %s %d %f %t %d %s\n",
-		m.Sample.T2.Format(time.RFC3339),
+		m.Sample.TimeEnd.Format(time.RFC3339),
 		m.Target.URL,
 		m.Sample.StatusCode,
-		m.Sample.Latency(),
+		m.Sample.TimeEnd.Sub(m.Sample.TimeStart).Seconds()*1000,
 		m.IsOK,
 		m.StateCount,
 		errMessage,

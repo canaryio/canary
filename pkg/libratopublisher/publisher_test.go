@@ -20,8 +20,8 @@ func TestGoodMeasurement(t *testing.T) {
 			Name: "test",
 		},
 		Sample: sampler.Sample{
-			T1:         t1,
-			T2:         t2,
+			TimeStart:  t1,
+			TimeEnd:    t2,
 			StatusCode: 200,
 		},
 	}
@@ -53,8 +53,8 @@ func TestBadHTTPMeasurement(t *testing.T) {
 			Name: "test",
 		},
 		Sample: sampler.Sample{
-			T1:         t1,
-			T2:         t2,
+			TimeStart:  t1,
+			TimeEnd:    t2,
 			StatusCode: 502,
 		},
 		Error: sampler.StatusCodeError{
@@ -102,8 +102,8 @@ func TestBadTransportMeasurement(t *testing.T) {
 			Name: "test",
 		},
 		Sample: sampler.Sample{
-			T1: t1,
-			T2: t2,
+			TimeStart: t1,
+			TimeEnd:   t2,
 		},
 		Error: fmt.Errorf("test error"),
 	}
