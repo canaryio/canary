@@ -18,8 +18,7 @@ func TestSample(t *testing.T) {
 		URL: ts.URL,
 	}
 
-	sampler := New(10)
-	sample, err := sampler.Sample(target)
+	sample, err := Ping(target, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,12 +41,10 @@ func TestSampleWithHeaders(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL:            ts.URL,
-		CaptureHeaders: []string{headerName},
+		URL: ts.URL,
 	}
 
-	sampler := New(10)
-	sample, err := sampler.Sample(target)
+	sample, err := Ping(target, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,8 +53,8 @@ func TestSampleWithHeaders(t *testing.T) {
 		t.Fatalf("Expected sampleStatus == 200, but got %d\n", sample.StatusCode)
 	}
 
-	if sample.ResponseHeaders[headerName] != headerVal {
-		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders[headerName])
+	if sample.ResponseHeaders.Get(headerName) != headerVal {
+		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders.Get(headerName))
 	}
 }
 
@@ -74,12 +71,10 @@ func TestSampleWithCanonicalizedHeaderName(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL:            ts.URL,
-		CaptureHeaders: []string{headerName},
+		URL: ts.URL,
 	}
 
-	sampler := New(1)
-	sample, err := sampler.Sample(target)
+	sample, err := Ping(target, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,8 +83,8 @@ func TestSampleWithCanonicalizedHeaderName(t *testing.T) {
 		t.Fatalf("Expected sampleStatus == 200, but got %d\n", sample.StatusCode)
 	}
 
-	if sample.ResponseHeaders[headerName] != headerVal {
-		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders[headerName])
+	if sample.ResponseHeaders.Get(headerName) != headerVal {
+		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders.Get(headerName))
 	}
 }
 
@@ -103,12 +98,10 @@ func TestSampleWithMissingHeader(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL:            ts.URL,
-		CaptureHeaders: []string{headerName},
+		URL: ts.URL,
 	}
 
-	sampler := New(1)
-	sample, err := sampler.Sample(target)
+	sample, err := Ping(target, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,8 +133,7 @@ func TestSampleWithRequestHeaders(t *testing.T) {
 		},
 	}
 
-	sampler := New(10)
-	sample, err := sampler.Sample(target)
+	sample, err := Ping(target, 1)
 	if err != nil {
 		t.Fatal(err)
 	}

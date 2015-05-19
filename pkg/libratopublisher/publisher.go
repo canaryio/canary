@@ -63,7 +63,8 @@ func (p *Publisher) Publish(m sensor.Measurement) (err error) {
 func mapMeasurement(m sensor.Measurement) map[string]float64 {
 	metrics := make(map[string]float64)
 	// latency
-	metrics["canary."+m.Target.Name+".latency"] = m.Sample.Latency()
+	latency := m.Sample.TimeEnd.Sub(m.Sample.TimeStart).Seconds() * 1000
+	metrics["canary."+m.Target.Name+".latency"] = latency
 	if m.Error != nil {
 		// increment a general error metric
 		metrics["canary."+m.Target.Name+".errors"] = 1

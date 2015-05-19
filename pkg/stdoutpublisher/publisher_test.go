@@ -16,8 +16,8 @@ func ExamplePublisher_Publish() {
 	t2, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:01Z")
 
 	sample := sampler.Sample{
-		T1:         t1,
-		T2:         t2,
+		TimeStart:  t1,
+		TimeEnd:    t2,
 		StatusCode: 200,
 	}
 

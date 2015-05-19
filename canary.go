@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/canaryio/canary/pkg/manifest"
-	"github.com/canaryio/canary/pkg/sampler"
 	"github.com/canaryio/canary/pkg/sensor"
 )
 
@@ -120,11 +119,11 @@ func (c *Canary) startSensors() {
 			sensor := sensor.Sensor{
 				Target:         target,
 				C:              c.OutputChan,
-				Sampler:        sampler.New(timeout),
 				StopChan:       make(chan int, 1),
 				IsStopped:      false,
 				StopNotifyChan: make(chan bool),
 				IsOK:           false,
+				Timeout:        timeout,
 			}
 			c.Sensors = append(c.Sensors, sensor)
 

@@ -20,17 +20,17 @@ type Measurement struct {
 type Sensor struct {
 	Target         sampler.Target
 	C              chan Measurement
-	Sampler        sampler.Sampler
 	StateCounter   int
 	StopChan       chan int
 	IsStopped      bool
 	StopNotifyChan chan bool
 	IsOK           bool
+	Timeout        int // timeout in secs
 }
 
 // take a sample against a target.
 func (s *Sensor) measure() Measurement {
-	sample, err := s.Sampler.Sample(s.Target)
+	sample, err := sampler.Ping(s.Target, s.Timeout)
 	m := Measurement{
 		Target: s.Target,
 		Sample: sample,
