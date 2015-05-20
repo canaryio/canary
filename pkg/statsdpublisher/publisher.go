@@ -15,7 +15,7 @@ type Publisher struct {
 	Prefix string
 }
 
-func New(host, source, prefix string) (*Publisher, error) {
+func New(source, host, prefix string) (*Publisher, error) {
 	conn, err := net.Dial("udp", host)
 	if err != nil {
 		return nil, err
