@@ -38,6 +38,11 @@ func (p *Publisher) Publish(m sensor.Measurement) error {
 
 func Write(w io.Writer, source, prefix string, m sensor.Measurement) error {
 	timeTotal := int(m.Sample.TimeEnd.Sub(m.Sample.TimeStart).Seconds() * 1000)
-	_, err := fmt.Fprintf(w, "%s.%s.%s.time_total:%d|ms\n", prefix, m.Target.Name, source, timeTotal)
+	_, err := fmt.Fprintf(w,
+		"%s.%s.%s.time_total:%d|ms\n",
+		prefix,
+		m.Target.Name,
+		source,
+		timeTotal)
 	return err
 }
