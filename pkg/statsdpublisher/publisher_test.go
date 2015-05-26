@@ -10,8 +10,8 @@ import (
 
 func ExampleStatsdpublisher_Write() {
 	target := sampler.Target{
-		Name: "foo",
-		URL:  "http://www.canary.io",
+		Name: "github",
+		URL:  "https://github.com",
 	}
 
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
@@ -24,11 +24,12 @@ func ExampleStatsdpublisher_Write() {
 	}
 
 	Write(os.Stdout, "test", "canary", sensor.Measurement{
-		Target:     target,
-		Sample:     sample,
-		IsOK:       true,
-		StateCount: 2,
+		Target: target,
+		Sample: sample,
 	})
 	// Output:
-	// canary.foo.test.time_total:1000|ms
+	// canary.github.test.time_to_connect:1000|ms
+	// canary.github.test.time_to_first_byte:1000|ms
+	// canary.github.test.time_total:1000|ms
+	// canary.github.test.http_status.200:1|c
 }
