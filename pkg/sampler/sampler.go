@@ -20,10 +20,11 @@ type Target struct {
 	Name     string
 	Interval int
 	// metadata
-	Tags           []string
-	Attributes     map[string]string
-	Hash           string
-	RequestHeaders map[string]string
+	Tags               []string
+	Attributes         map[string]string
+	Hash               string
+	RequestHeaders     map[string]string
+	InsecureSkipVerify bool
 }
 
 func (t *Target) SetHash() {
@@ -134,7 +135,9 @@ func dial(t Target) (net.Conn, error) {
 	case "http":
 		return net.Dial("tcp", host)
 	case "https":
-		return tls.Dial("tcp", host, &tls.Config{})
+		return tls.Dial("tcp", host, &tls.Config{
+			InsecureSkipVerify: t.InsecureSkipVerify,
+		})
 	default:
 		return nil, fmt.Errorf("unknown scheme '%s'", u.Scheme)
 	}
