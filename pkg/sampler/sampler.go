@@ -204,12 +204,21 @@ func genRequest(t Target) (string, error) {
 		return "", err
 	}
 
+	// allow Host header to be set via t.RequestHeaders
+	// otherwise, use the host of the URL
+	hostHeader := t.RequestHeaders["Host"]
+	if hostHeader == "" {
+		hostHeader = u.Host
+	}
+
 	// our standard request
 	req := fmt.Sprintf("GET %s HTTP/1.1\r\n", u.RequestURI())
-	req += fmt.Sprintf("Host: %s\r\n", u.Host)
+	req += fmt.Sprintf("Host: %s\r\n", hostHeader)
 
 	for k, v := range t.RequestHeaders {
-		req += fmt.Sprintf("%s: %s\r\n", k, v)
+		if k != "Host" {
+			req += fmt.Sprintf("%s: %s\r\n", k, v)
+		}
 	}
 
 	// trailing newline

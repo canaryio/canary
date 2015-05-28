@@ -147,3 +147,42 @@ func TestSampleWithRequestHeaders(t *testing.T) {
 		t.Fatalf("Expected request header X-Foo to be 'bar' but was '%s'", h)
 	}
 }
+
+func TestGenRequest(t *testing.T) {
+	expected := "GET / HTTP/1.1\r\nHost: canary.io\r\n\r\n"
+	target := Target{
+		URL: "http://canary.io",
+	}
+
+	req, err := genRequest(target)
+	if err != nil {
+		t.Fatalf("err while generating request: %v\n", err)
+	}
+
+	if req != expected {
+		t.Fatalf("Expected request to look like:\n%s\n but got:\n%s\n", expected, req)
+	}
+
+}
+
+func TestGenRequestWithCustomHost(t *testing.T) {
+	expected := "GET / HTTP/1.1\r\nHost: canary.io\r\n\r\n"
+
+	headers := make(map[string]string)
+	headers["Host"] = "canary.io"
+
+	target := Target{
+		URL:            "http://192.168.1.1",
+		RequestHeaders: headers,
+	}
+
+	req, err := genRequest(target)
+	if err != nil {
+		t.Fatalf("err while generating request: %v\n", err)
+	}
+
+	if req != expected {
+		t.Fatalf("Expected request to look like:\n%s\n but got:\n%s\n", expected, req)
+	}
+
+}
