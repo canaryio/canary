@@ -112,7 +112,7 @@ func (c *Canary) startSensors() {
 			}
 		} else {
 			timeout := target.Interval
-			if timeout > c.Config.MaxSampleTimeout {
+			if c.Config.MaxSampleTimeout > 0 && timeout > c.Config.MaxSampleTimeout {
 				timeout = c.Config.MaxSampleTimeout
 			}
 
