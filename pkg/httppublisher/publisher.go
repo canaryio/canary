@@ -96,7 +96,7 @@ func (p *Publisher) flush() error {
 		return fmt.Errorf("httppublisher err='%s'", err)
 	}
 
-	if resp.StatusCode != 200 || resp.StatusCode != 201 || resp.StatusCode != 202 {
+	if resp.StatusCode != 200 {
 		return fmt.Errorf("httppublisher err='http status' status_code=%d", resp.StatusCode)
 	}
 
