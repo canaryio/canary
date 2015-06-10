@@ -65,6 +65,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 
 	conn, err := dial(target)
 	if err != nil {
+		err = fmt.Errorf("connecting: %s", err)
 		return
 	}
 	defer conn.Close()
@@ -87,6 +88,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 
 	sample.StatusCode, err = parseStatus(r)
 	if err != nil {
+		err = fmt.Errorf("parsing status: %s", err)
 		return
 	}
 
@@ -94,6 +96,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 
 	sample.ResponseHeaders, err = parseHeaders(r)
 	if err != nil {
+		err = fmt.Errorf("parsing headers: %s", err)
 		return
 	}
 
@@ -102,6 +105,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	if val != "" {
 		contentLength, err := strconv.Atoi(val)
 		if err != nil {
+			err = fmt.Errorf("parsing Content-Length: %s", err)
 			return sample, err
 		}
 		n := 0
