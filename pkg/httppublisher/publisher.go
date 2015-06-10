@@ -55,7 +55,10 @@ func (p *Publisher) run() {
 
 			// flush if we've exceeded the bounds of our buffer
 			if p.i >= MAX_BUFFER {
-				p.flush()
+				err := p.flush()
+				if err != nil {
+					log.Print(err)
+				}
 			}
 		}
 	}
