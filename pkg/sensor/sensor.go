@@ -22,7 +22,6 @@ type Sensor struct {
 	C              chan Measurement
 	StateCounter   int
 	StopChan       chan int
-	IsStopped      bool
 	StopNotifyChan chan bool
 	IsOK           bool
 	Timeout        int // timeout in secs
@@ -64,7 +63,7 @@ func (s *Sensor) Start(delay float64) {
 	s.C <- s.measure()
 
 	isStopped := false
-	for isStopped {
+	for ! isStopped {
 		<-t.C
 		select {
 		case <-s.StopChan:
