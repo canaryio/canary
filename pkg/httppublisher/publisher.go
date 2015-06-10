@@ -45,8 +45,7 @@ func (p *Publisher) run() {
 		select {
 		case <-t.C:
 			// flush when our ticker fires
-			err := p.flush()
-			if err != nil {
+			if err := p.flush(); err != nil {
 				log.Print(err)
 			}
 		case m := <-p.c:
@@ -55,8 +54,7 @@ func (p *Publisher) run() {
 
 			// flush if we've exceeded the bounds of our buffer
 			if p.i >= MAX_BUFFER {
-				err := p.flush()
-				if err != nil {
+				if err := p.flush(); err != nil {
 					log.Print(err)
 				}
 			}
