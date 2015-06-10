@@ -63,11 +63,12 @@ func (s *Sensor) Start(delay float64) {
 	// Measure, then wait for ticker interval
 	s.C <- s.measure()
 
-	for {
+	isStopped := false
+	for isStopped {
 		<-t.C
 		select {
 		case <-s.StopChan:
-			s.IsStopped = true
+			isStopped = true
 			s.StopNotifyChan <- true
 			return
 		default:

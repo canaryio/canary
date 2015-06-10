@@ -120,7 +120,6 @@ func (c *Canary) startSensors() {
 				Target:         target,
 				C:              c.OutputChan,
 				StopChan:       make(chan int, 1),
-				IsStopped:      false,
 				StopNotifyChan: make(chan bool),
 				IsOK:           false,
 				Timeout:        timeout,
