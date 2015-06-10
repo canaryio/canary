@@ -63,8 +63,8 @@ func (p *Publisher) run() {
 }
 
 func (p *Publisher) flush() error {
-	payload, err := json.Marshal(p.buffer)
 	defer func() { p.i = 0 }()
+	payload, err := json.Marshal(p.buffer[:p.i])
 
 	if err != nil {
 		return fmt.Errorf("httppublisher err='%s'", err)
