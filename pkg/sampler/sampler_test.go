@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+	"strings"
 )
 
 func TestSample(t *testing.T) {
@@ -55,6 +57,44 @@ func TestSampleWithHeaders(t *testing.T) {
 
 	if sample.ResponseHeaders.Get(headerName) != headerVal {
 		t.Fatalf("Expected header %s to equal %s but got %s", headerName, headerVal, sample.ResponseHeaders.Get(headerName))
+	}
+}
+
+func TestSampleWithBodyTimeout(t *testing.T) {
+	timeout := 1 * time.Second
+	
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		conn, stream, err := w.(http.Hijacker).Hijack()
+		
+		if err != nil {
+			t.Fatalf("unable to hijack connection: %+v", err)
+			return
+		}
+		
+		defer conn.Close()
+
+		fmt.Fprintf(stream, "HTTP/1.1 200 OK\r\n")
+		fmt.Fprintf(stream, "Content-Length: 42\r\n")
+		fmt.Fprintf(stream, "\r\n")
+		stream.Flush()
+		
+		// make sure this request takes longer than the sample timeout
+		<- time.After(timeout * 2)
+	}
+	ts := httptest.NewServer(http.HandlerFunc(handler))
+	defer ts.Close()
+
+	target := Target{
+		URL: ts.URL,
+	}
+
+	_, err := Ping(target, int(timeout / time.Second))
+	if err == nil {
+		t.Fatal("Expected timeout error, got nil")
+	}
+
+	if ! strings.Contains(err.Error(), "i/o timeout") {
+		t.Fatalf("expected '%s' to contain 'i/o timeout'", err)
 	}
 }
 
