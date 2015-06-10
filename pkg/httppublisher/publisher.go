@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/canaryio/canary/pkg/sensor"
@@ -31,6 +33,25 @@ func New(url string, interval time.Duration) *Publisher {
 	}
 	go p.run()
 	return p
+}
+
+func NewFromEnv() (*Publisher, error) {
+	url := os.Getenv("HTTP_PUBLISHER_URL")
+	if url == "" {
+		return nil, fmt.Errorf("HTTP_PUBLISHER_URL not set in ENV")
+	}
+
+	sInterval := os.Getenv("HTTP_PUBLISHER_INTERVAL")
+	if sInterval == "" {
+		sInterval = "10"
+	}
+
+	interval, err := strconv.Atoi(sInterval)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP_PUBLISHER_INTERVAL %s not parsable as an int", sInterval)
+	}
+
+	return New(url, time.Duration(interval)*time.Second), nil
 }
 
 func (p *Publisher) Publish(m sensor.Measurement) error {
