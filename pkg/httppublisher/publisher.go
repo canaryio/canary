@@ -66,6 +66,8 @@ func (p *Publisher) run() {
 
 func (p *Publisher) flush() error {
 	payload, err := json.Marshal(p.buffer)
+	defer func() { p.i = 0 }()
+
 	if err != nil {
 		return fmt.Errorf("httppublisher err='%s'", err)
 	}
@@ -79,6 +81,5 @@ func (p *Publisher) flush() error {
 		return fmt.Errorf("httppublisher err='http status' status_code=%d", resp.StatusCode)
 	}
 
-	p.i = 0
 	return nil
 }
