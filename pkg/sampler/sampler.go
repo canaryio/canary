@@ -112,6 +112,9 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 		buf := make([]byte, contentLength)
 		for i := contentLength; i > 0; i = i - n {
 			n, err = r.Read(buf)
+			if err != nil {
+				return sample, err
+			}
 		}
 	}
 
