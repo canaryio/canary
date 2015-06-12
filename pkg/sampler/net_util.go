@@ -1,25 +1,53 @@
 package sampler
 
 import (
-	"fmt"
 	"net"
+	"time"
+	"fmt"
+	"errors"
 	"crypto/tls"
 )
 
-func dial(t Target) (net.Conn, error) {
-	host, err := hostString(&t.URL)
-	if err != nil {
-		return nil, err
+type lookupResult struct {
+	IP net.IP
+	Err error
+}
+
+func resolveIPAddr(host string, deadline time.Time) (net.IP, error) {
+	resultChan := make(chan *lookupResult)
+	
+	go func() {
+		var ip net.IP
+		
+		ips, err := net.LookupIP(host)
+		if err == nil {
+			ip = ips[0]
+		}
+		
+		resultChan <- &lookupResult{ip, err}
+	}()
+	
+	select {
+		case result := <- resultChan:
+			return result.IP, result.Err
+		case <- time.After(deadline.Sub(time.Now())):
+			return nil, errors.New("dns timeout")
+	}
+}
+
+func dial(scheme string, addr string, deadline time.Time, insecure bool) (net.Conn, error) {
+	dialer := &net.Dialer{
+		Deadline: deadline,
 	}
 
-	switch t.URL.Scheme {
+	switch scheme {
 	case "http":
-		return net.Dial("tcp", host)
+		return dialer.Dial("tcp", addr)
 	case "https":
-		return tls.Dial("tcp", host, &tls.Config{
-			InsecureSkipVerify: t.InsecureSkipVerify,
+		return tls.DialWithDialer(dialer, "tcp", addr, &tls.Config{
+			InsecureSkipVerify: insecure,
 		})
 	default:
-		return nil, fmt.Errorf("unknown scheme '%s'", t.URL.Scheme)
+		return nil, fmt.Errorf("unknown scheme '%s'", scheme)
 	}
 }

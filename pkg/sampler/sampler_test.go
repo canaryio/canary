@@ -104,6 +104,52 @@ func TestSampleWithBodyTimeout(t *testing.T) {
 	}
 }
 
+func TestSampleWithConnectionFailed(t *testing.T) {
+	// specifically, we want the remote ip address even if the connection fails
+	
+	// ok, this is hokey.  I want Ping() to fail because it can't connect, but
+	// I need to make sure there isn't anything listening on that port.  So,
+	// here's hoping for no race conditions…
+	ts := httptest.NewServer(nil)
+
+	target := Target{
+		URL: parseUrl(ts.URL),
+	}
+
+	ts.Close()
+	
+	sample, err := Ping(target, 1)
+
+	if err == nil {
+		t.Fatal("Expected connection refused error, got nil")
+	}
+
+	if ! strings.Contains(err.Error(), "connection refused") {
+		t.Fatalf("expected '%s' to contain 'connection refused'", err)
+	}
+	
+	if sample.RemoteAddr.String() != "127.0.0.1" {
+		t.Fatalf("expected remote addr '%v' to be '127.0.0.1'", sample.RemoteAddr)
+	}
+}
+
+func TestSampleWithInvalidHostname(t *testing.T) {
+	target := Target{
+		// this domainname is unlikely to exist
+		URL: parseUrl("http://xn--f02d459ace9f2738b18cbd5751735035d9763d0d-pq993b.co.puny/"),
+	}
+
+	_, err := Ping(target, 1)
+
+	if err == nil {
+		t.Fatal("Expected no such host error, got nil")
+	}
+
+	if ! strings.Contains(err.Error(), "no such host") {
+		t.Fatalf("expected '%s' to contain 'connection refused'", err)
+	}
+}
+
 func TestSampleWithCanonicalizedHeaderName(t *testing.T) {
 	headerName := "x-request-id"
 	headerVal := "abcd-1234"

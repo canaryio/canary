@@ -13,12 +13,13 @@ import (
 type Sample struct {
 	StatusCode      int
 	TimeStart       time.Time
+	TimeToResolveIP time.Time
 	TimeToConnect   time.Time
 	TimeToFirstByte time.Time
 	TimeEnd         time.Time
 	ResponseHeaders http.Header
-	LocalAddr       net.Addr
-	RemoteAddr      net.Addr
+	LocalAddr       net.IP
+	RemoteAddr      net.IP
 }
 
 // StatusCodeError is an error representing an HTTP Status code
@@ -36,21 +37,41 @@ func (e StatusCodeError) Error() string {
 
 // Ping measures a given URL and returns a Sample
 func Ping(target Target, timeout int) (sample Sample, err error) {
+	// we require four pieces of information to make the request:
+	// * hostname to connect to
+	// * port to connect to
+	// * ip address of the hostname
+	// * Host header value
+	
+	hostname, port, err := hostnameAndPort(&target.URL)
+	if err != nil {
+		return
+	}
+
 	sample.TimeStart = time.Now()
 	defer func() { sample.TimeEnd = time.Now() }()
 
-	conn, err := dial(target)
+	deadline := sample.TimeStart.Add(time.Duration(timeout) * time.Second)
+	
+	ip, err := resolveIPAddr(hostname, deadline)
+	if err != nil {
+		err = fmt.Errorf("resolving IP for %s: %s", hostname, err)
+		return
+	}
+
+	sample.TimeToResolveIP = time.Now()
+	sample.RemoteAddr = ip
+	
+	conn, err := dial(target.URL.Scheme, ip.String() + ":" + port, deadline, target.InsecureSkipVerify)
 	if err != nil {
 		err = fmt.Errorf("connecting: %s", err)
 		return
 	}
 	defer conn.Close()
-	conn.SetDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+	conn.SetDeadline(deadline)
 
 	sample.TimeToConnect = time.Now()
-
-	sample.LocalAddr = conn.LocalAddr()
-	sample.RemoteAddr = conn.RemoteAddr()
+	sample.LocalAddr = conn.LocalAddr().(*net.TCPAddr).IP
 
 	req, err := genRequest(target)
 	if err != nil {
@@ -103,19 +124,25 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	return
 }
 
-func hostString(u *JsonURL) (string, error) {
-	// if our Host already has a port, bail out
-	if strings.Contains(u.Host, ":") {
-		return u.Host, nil
+func hostnameAndPort(u *JsonURL) (hostname string, port string, err error) {
+	// @todo investigate net.SplitHostPort
+	hostname = u.Host
+ 	
+ 	if colonInd := strings.LastIndex(hostname, ":"); colonInd > 0 {
+ 		// there's a port in the hostname
+ 		port = hostname[colonInd+1:len(hostname)]
+ 		
+ 		hostname = hostname[:colonInd]
+ 	} else {
+		switch u.Scheme {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		default:
+			err =  fmt.Errorf("unknown URL scheme '%s' and no port provided", u.Scheme)
+		}
 	}
 
-	switch u.Scheme {
-	case "http":
-		return u.Host + ":80", nil
-	case "https":
-		return u.Host + ":443", nil
-	default:
-		return "", fmt.Errorf("unknown URL scheme '%s'", u.Scheme)
-	}
+	return
 }
-
