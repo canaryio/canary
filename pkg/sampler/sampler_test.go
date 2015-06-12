@@ -91,7 +91,7 @@ func TestSampleWithBodyTimeout(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 	}
 
 	_, err := Ping(target, int(timeout / time.Second))
