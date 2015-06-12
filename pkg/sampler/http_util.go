@@ -2,7 +2,6 @@ package sampler
 
 import (
 	"net/http"
-	"net/url"
 	"bufio"
 	"strings"
 	"fmt"
@@ -52,20 +51,15 @@ func parseHeaders(r *bufio.Reader) (http.Header, error) {
 }
 
 func genRequest(t Target) (string, error) {
-	u, err := url.Parse(t.URL)
-	if err != nil {
-		return "", err
-	}
-
 	// allow Host header to be set via t.RequestHeaders
 	// otherwise, use the host of the URL
 	hostHeader := t.RequestHeaders["Host"]
 	if hostHeader == "" {
-		hostHeader = u.Host
+		hostHeader = t.URL.Host
 	}
 
 	// our standard request
-	req := fmt.Sprintf("GET %s HTTP/1.1\r\n", u.RequestURI())
+	req := fmt.Sprintf("GET %s HTTP/1.1\r\n", t.URL.RequestURI())
 	req += fmt.Sprintf("Host: %s\r\n", hostHeader)
 
 	for k, v := range t.RequestHeaders {

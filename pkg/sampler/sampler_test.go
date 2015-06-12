@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+func parseUrl(str string) JsonURL {
+	u, _ := NewJsonURL(str)
+	
+	return *u
+}
+
 func TestSample(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ok")
@@ -17,7 +23,7 @@ func TestSample(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 	}
 
 	sample, err := Ping(target, 1)
@@ -43,7 +49,7 @@ func TestSampleWithHeaders(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 	}
 
 	sample, err := Ping(target, 1)
@@ -111,7 +117,7 @@ func TestSampleWithCanonicalizedHeaderName(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 	}
 
 	sample, err := Ping(target, 1)
@@ -138,7 +144,7 @@ func TestSampleWithMissingHeader(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 	}
 
 	sample, err := Ping(target, 1)
@@ -167,7 +173,7 @@ func TestSampleWithRequestHeaders(t *testing.T) {
 	defer ts.Close()
 
 	target := Target{
-		URL: ts.URL,
+		URL: parseUrl(ts.URL),
 		RequestHeaders: map[string]string{
 			"X-Foo": "bar",
 		},
@@ -191,7 +197,7 @@ func TestSampleWithRequestHeaders(t *testing.T) {
 func TestGenRequest(t *testing.T) {
 	expected := "GET / HTTP/1.1\r\nHost: canary.io\r\n\r\n"
 	target := Target{
-		URL: "http://canary.io",
+		URL: parseUrl("http://canary.io"),
 	}
 
 	req, err := genRequest(target)
@@ -212,7 +218,7 @@ func TestGenRequestWithCustomHost(t *testing.T) {
 	headers["Host"] = "canary.io"
 
 	target := Target{
-		URL:            "http://192.168.1.1",
+		URL:            parseUrl("http://192.168.1.1"),
 		RequestHeaders: headers,
 	}
 

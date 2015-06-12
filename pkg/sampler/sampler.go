@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -104,7 +103,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	return
 }
 
-func hostString(u *url.URL) (string, error) {
+func hostString(u *JsonURL) (string, error) {
 	// if our Host already has a port, bail out
 	if strings.Contains(u.Host, ":") {
 		return u.Host, nil

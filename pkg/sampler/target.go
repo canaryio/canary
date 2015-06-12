@@ -7,7 +7,7 @@ import (
 )
 
 type Target struct {
-	URL      string
+	URL      JsonURL
 	Name     string
 	Interval int
 	// metadata

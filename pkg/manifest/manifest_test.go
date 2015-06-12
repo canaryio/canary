@@ -38,7 +38,7 @@ func TestGetWithoutInterval(t *testing.T) {
 		t.Fatalf("expected name to be equal to 'canary', go %s", target.URL)
 	}
 
-	if target.URL != "http://www.canary.io" {
+	if target.URL.String() != "http://www.canary.io" {
 		t.Fatalf("expected URL to be equal to 'http://www.canary.io', got %s", target.URL)
 	}
 
