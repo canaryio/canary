@@ -21,7 +21,7 @@ func usage() {
 }
 
 // builds the app configuration via ENV
-func getConfig() (c canary.Config, url string, err error) {
+func getConfig() (c canary.Config, url sampler.JsonURL, err error) {
 	flag.Usage = usage
 	flag.Parse()
 
@@ -51,7 +51,11 @@ func getConfig() (c canary.Config, url string, err error) {
 	if len(args) < 1 {
 		usage()
 	}
-	url = args[0]
+
+	u, err := sampler.NewJsonURL(args[0])
+	if err == nil {
+		url = *u
+	}
 
 	return
 }

@@ -8,8 +8,9 @@ import (
 )
 
 func ExamplePublisher_Publish() {
+	url, _ := sampler.NewJsonURL("http://www.canary.io")
 	target := sampler.Target{
-		URL: "http://www.canary.io",
+		URL: *url,
 	}
 
 	t1, _ := time.Parse(time.RFC3339, "2014-12-28T00:00:00Z")
