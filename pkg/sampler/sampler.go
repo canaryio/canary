@@ -62,7 +62,13 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	sample.TimeToResolveIP = time.Now()
 	sample.RemoteAddr = ip
 	
-	conn, err := dial(target.URL.Scheme, ip.String() + ":" + port, hostname, deadline, target.InsecureSkipVerify)
+	// ipv6 addresses must be wrapped in brackets
+	ipStr := ip.String()
+	if ip.To4() == nil {
+		ipStr = "[" + ipStr + "]"
+	}
+	
+	conn, err := dial(target.URL.Scheme, ipStr + ":" + port, hostname, deadline, target.InsecureSkipVerify)
 	if err != nil {
 		err = fmt.Errorf("connecting: %s", err)
 		return
@@ -77,9 +83,8 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Fprint(
-		conn,
-		req)
+
+	fmt.Fprint(conn, req)
 
 	r := bufio.NewReader(conn)
 
