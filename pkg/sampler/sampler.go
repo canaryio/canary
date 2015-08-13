@@ -62,7 +62,7 @@ func Ping(target Target, timeout int) (sample Sample, err error) {
 	sample.TimeToResolveIP = time.Now()
 	sample.RemoteAddr = ip
 	
-	conn, err := dial(target.URL.Scheme, ip.String() + ":" + port, deadline, target.InsecureSkipVerify)
+	conn, err := dial(target.URL.Scheme, ip.String() + ":" + port, hostname, deadline, target.InsecureSkipVerify)
 	if err != nil {
 		err = fmt.Errorf("connecting: %s", err)
 		return
