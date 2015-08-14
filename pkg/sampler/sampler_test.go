@@ -276,5 +276,21 @@ func TestGenRequestWithCustomHost(t *testing.T) {
 	if req != expected {
 		t.Fatalf("Expected request to look like:\n%s\n but got:\n%s\n", expected, req)
 	}
-
 }
+
+func TestConnectSecurelyWithVerify(t *testing.T) {
+	target := Target{
+		URL: parseUrl("https://www.google.com/"),
+		InsecureSkipVerify: false,
+	}
+
+	sample, err := Ping(target, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if sample.StatusCode != 200 {
+		t.Fatalf("Expected sampleStatus == 200, but got %d\n", sample.StatusCode)
+	}
+}
+

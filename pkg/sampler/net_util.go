@@ -35,7 +35,7 @@ func resolveIPAddr(host string, deadline time.Time) (net.IP, error) {
 	}
 }
 
-func dial(scheme string, addr string, deadline time.Time, insecure bool) (net.Conn, error) {
+func dial(scheme string, addr string, serverName string, deadline time.Time, insecure bool) (net.Conn, error) {
 	dialer := &net.Dialer{
 		Deadline: deadline,
 	}
@@ -45,6 +45,7 @@ func dial(scheme string, addr string, deadline time.Time, insecure bool) (net.Co
 		return dialer.Dial("tcp", addr)
 	case "https":
 		return tls.DialWithDialer(dialer, "tcp", addr, &tls.Config{
+			ServerName:         serverName,
 			InsecureSkipVerify: insecure,
 		})
 	default:
