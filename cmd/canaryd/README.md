@@ -17,6 +17,7 @@ $ go get github.com/canaryio/canary/cmd/canaryd
 * `PUBLISHERS` - an explicit list of pubilshers to enable, defaulting to `stdout`
 * `DEFAULT_MAX_TIMEOUT` - The max timeout value for any target. Actual timeout will be this value, or the interval if lower.
 * `AUTO_RELOAD_INTERVAL` - The value (in seconds, as a floating point string) to query MANIFEST_URL for a potential manifest reload.See the Manifest reloading section for more information.
+* `MAX_RELOAD_FAILURES` - The maximum number of allowed consecutive manifest reload failures combined with `AUTO_RELOAD_INTERVAL` (defaulting to 5). This parameter is specified as an integer and enables canaryd to handle if the `MANIFEST_URL` backend is temporarily unavailable. If a failure is caught before this threshold, then no changes are made to the currently executing manifest. If this threshold is reached, canaryd will exit with status 1 and an informational error about what caused the error. 
 * `DEFAULT_SAMPLE_INTERVAL` - interval rate (in seconds) for targets without a defined interval value, defaults to 1 second.
 * `RAMPUP_SENSORS` - When set to 'yes', configure a delayed start for each target sensors, with the delay based on an even division of DEFAULT_SAMPLE_INTERVAL by the target index. This assists with performance for large numbers of targets. This will cause all targets to be measured within one full DEFAULT_SAMPLE_INTERVAL when starting.
 
