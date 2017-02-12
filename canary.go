@@ -134,14 +134,20 @@ func (c *Canary) startSensors() {
 
 func (c *Canary) StartAutoReload(interval time.Duration) {
 	t := time.NewTicker(interval)
+	failedReloads := 0
 	for {
 		<-t.C
 		manifest, err := manifest.Get(c.Config.ManifestURL, c.Config.DefaultSampleInterval)
 		if err != nil {
-			log.Fatal(err)
-		}
-		if manifest.Hash != c.Manifest.Hash {
-			c.ReloadChan <- manifest
+			failedReloads++
+			if failedReloads == c.Config.MaxReloadFailures {
+				log.Fatalf("canary: Error reloading manifest (attempt: %d/%d at a %s interval): %s", failedReloads, c.Config.MaxReloadFailures, interval, err)
+			}
+		} else {
+			failedReloads = 0
+			if manifest.Hash != c.Manifest.Hash {
+				c.ReloadChan <- manifest
+			}
 		}
 	}
 }

@@ -7,5 +7,6 @@ type Config struct {
 	DefaultSampleInterval int
 	RampupSensors         bool
 	ReloadInterval        time.Duration
+	MaxReloadFailures     int
 	MaxSampleTimeout      int
 }

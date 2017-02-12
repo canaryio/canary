@@ -60,6 +60,18 @@ func getConfig() (c canary.Config, err error) {
 		c.ReloadInterval = duration
 	}
 
+	if err == nil {
+		maxReloadFailures := os.Getenv("MAX_RELOAD_FAILURES")
+		if maxReloadFailures == "" {
+			maxReloadFailures = "5"
+		}
+
+		c.MaxReloadFailures, err = strconv.Atoi(maxReloadFailures)
+		if err != nil {
+			err = fmt.Errorf("MAX_RELOAD_FAILURES is not a valid integer")
+		}
+	}
+
 	// Set RampupSensors if RAMPUP_SENSORS is set to 'yes'
 	rampUp := os.Getenv("RAMPUP_SENSORS")
 	if rampUp == "yes" {
