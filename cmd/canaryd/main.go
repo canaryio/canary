@@ -11,6 +11,7 @@ import (
 
 	"github.com/canaryio/canary"
 
+	"github.com/canaryio/canary/pkg/httppublisher"
 	"github.com/canaryio/canary/pkg/libratopublisher"
 	"github.com/canaryio/canary/pkg/manifest"
 	"github.com/canaryio/canary/pkg/stdoutpublisher"
@@ -96,6 +97,12 @@ func createPublishers() (publishers []canary.Publisher) {
 			publishers = append(publishers, stdoutpublisher.New())
 		case "librato":
 			p, err := libratopublisher.NewFromEnv()
+			if err != nil {
+				log.Fatal(err)
+			}
+			publishers = append(publishers, p)
+		case "http":
+			p, err := httppublisher.NewFromEnv()
 			if err != nil {
 				log.Fatal(err)
 			}
